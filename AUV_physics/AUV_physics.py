@@ -3,7 +3,13 @@ from numpy import pi,sin,cos
 class AUV():
 	def __init__(self):
 		self.mass = 27#kg
-		self.buoyancy =157#N
+		self.mass_Matrix = self.mass*np.eye(3)
+		self.inertia=np.array([	[1,1,1],
+								[1,1,1],
+								[1,1,1]
+							])
+		self.M_rb=np.append(np.append(self.mass_Matrix,np.zeros((3,3)),axis=1),np.append(np.zeros((3,3)),self.inertia,axis=1),axis=0)
+		self.buoyancy =14#N
 		self.buoyancy_center = np.array([[0.],[0.],[1.]])
 		# motor 1. [2x3] face and position
 		self.motor = ["","","","","","","",""]
@@ -23,13 +29,15 @@ class AUV():
 		self.Trust = np.empty(shape=(0,6))
 		for i in self.motor:
 			self.Trust = np.vstack((self.Trust,np.append(i[0],np.cross(i[0],i[1]))))
-		self.buoyancy_center=np.array([0,0,-0.2])
+		self.buoyancy_center=np.array([0,0,-0.014])
 	def Eular_update(roll,pitch,yaw):
 		self.roll=roll
 		self.pitch=pitch
 		self.yaw=yaw
 	def gravity(self):
 		return 9.790
+	def mass_effect(self,acc):
+		return np.dot(self.M_rb,acc)
 	def buoyancy_effect(self):
 		g=self.gravity()
 		#                   
@@ -50,3 +58,5 @@ class AUV():
 Po=AUV()
 #print(Po.Trust)
 print(Po.buoyancy_effect())
+print(Po.M_rb)
+print(Po.mass_effect(np.array([[1,1,1,1,1,1]]).T))
