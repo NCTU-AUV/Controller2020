@@ -1,16 +1,38 @@
 import numpy as np
 from numpy import pi,sin,cos
+import time
 class AUV():
 	def __init__(self):
-		self.mass = 27#kg
-		self.mass_Matrix = self.mass*np.eye(3)
-		self.inertia=np.array([	[1,1,1],
-								[1,1,1],
-								[1,1,1]
-							])
-		self.M_rb=np.append(np.append(self.mass_Matrix,np.zeros((3,3)),axis=1),np.append(np.zeros((3,3)),self.inertia,axis=1),axis=0)
+		#     there will be mass + damp + Coriolis +buoyancy
+		# ===================================================== #
+		#                        mass                           #
+		# ===================================================== #
+		self.mass_scaler = 27#kg
+		self.mass = self.mass_scaler*np.eye(3)
+		self.inertia = np.array([	[1,1,1],
+									[1,1,1],
+									[1,1,1]
+								])
+		self.M_rb=np.append(np.append(self.mass,np.zeros((3,3)),axis=1),np.append(np.zeros((3,3)),self.inertia,axis=1),axis=0)
+
+		# ===================================================== #
+		#                        buoyancy                       #
+		# ===================================================== #
 		self.buoyancy =14#N
-		self.buoyancy_center = np.array([[0.],[0.],[1.]])
+		self.buoyancy_center = np.array([0,0,-0.014])
+
+		# ===================================================== #
+		#                        Coriolis                       #
+		# ===================================================== #
+		
+		# ===================================================== #
+		#                        Drag                           #
+		# ===================================================== #
+		
+		self.drag=np.eye(6)*np.array([[1,2,3,4,5,6]]).T
+		# ===================================================== #
+		#                        motor                          #
+		# ===================================================== #		
 		# motor 1. [2x3] face and position
 		self.motor = ["","","","","","","",""]
 		#						Vector 					Position
@@ -22,14 +44,16 @@ class AUV():
 		self.motor[5]=np.array([[-2**0.5,-2**0.5, 0.],	[-0.2,0.1,0]])
 		self.motor[6]=np.array([[-2**0.5,2**0.5, 0.],	[-0.2,-0.1,0]])
 		self.motor[7]=np.array([[2**0.5,2**0.5, 0.],		[0.2,-0.1,0]])
+		self.Trust = np.empty(shape=(0,6))
+		for i in self.motor:
+			self.Trust = np.vstack((self.Trust,np.append(i[0],np.cross(i[0],i[1]))))
+		# ===================================================== #
+		#                        attitude                       #
+		# ===================================================== #
 		self.roll=0.
 		self.pitch=0.
 		self.yaw=0.
 		#Thrust Mapping
-		self.Trust = np.empty(shape=(0,6))
-		for i in self.motor:
-			self.Trust = np.vstack((self.Trust,np.append(i[0],np.cross(i[0],i[1]))))
-		self.buoyancy_center=np.array([0,0,-0.014])
 	def Eular_update(roll,pitch,yaw):
 		self.roll=roll
 		self.pitch=pitch
@@ -38,12 +62,18 @@ class AUV():
 		return 9.790
 	def mass_effect(self,acc):
 		return np.dot(self.M_rb,acc)
+	def coriolis_effect(self,vel):
+		mass = self.mass_scaler
+		Coriolis_l = 2*np.cross(mass*vel[0][3:6],vel[0][0:3]*pi/180)
+		print(Coriolis_l)
+	def drag_effect(self,vel):
+		return self.drag.dot(vel.T)
 	def buoyancy_effect(self):
 		g=self.gravity()
 		#                   
-		return(np.array([	[(self.buoyancy-self.mass*g)*sin(self.pitch*pi/180.)],
-							[-(self.buoyancy-self.mass*g)*cos(self.pitch*pi/180.)*sin(self.roll*pi/180.)],
-							[-(self.buoyancy-self.mass*g)*cos(self.pitch*pi/180.)*cos(self.roll*pi/180.)],
+		return(np.array([	[(self.buoyancy-self.mass_scaler*g)*sin(self.pitch*pi/180.)],
+							[-(self.buoyancy-self.mass_scaler*g)*cos(self.pitch*pi/180.)*sin(self.roll*pi/180.)],
+							[-(self.buoyancy-self.mass_scaler*g)*cos(self.pitch*pi/180.)*cos(self.roll*pi/180.)],
 							[self.buoyancy*cos(self.roll)*(self.buoyancy_center[2]*sin(self.roll*pi/180.)-self.buoyancy_center[1]*cos(self.pitch*pi/180.))],
 							[self.buoyancy*(self.buoyancy_center[0]*cos(self.roll*pi/180)*cos(self.pitch*pi/180.)+self.buoyancy_center[2]*sin(self.pitch*pi/180.))],
 							[-self.buoyancy*(self.buoyancy_center[0]*sin(self.roll*pi/180)*cos(self.pitch*pi/180.)+self.buoyancy_center[1]*sin(self.pitch*pi/180.))],
@@ -55,8 +85,12 @@ class AUV():
  							])
  				)
  		'''
+
 Po=AUV()
 #print(Po.Trust)
+vel=np.array([[0.1,0,0,0,0,1]])
 print(Po.buoyancy_effect())
 print(Po.M_rb)
 print(Po.mass_effect(np.array([[1,1,1,1,1,1]]).T))
+print(Po.coriolis_effect(vel))
+print(Po.drag_effect(vel))
