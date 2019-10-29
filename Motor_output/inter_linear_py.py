@@ -169,7 +169,7 @@ def binSearch(arr, l, r, x):
         return -2
     
     while r-l+1 > 2:
-        m = (l+r)/2
+        m = (l+r)//2
         if arr[m] <= x:
             l = m
         else:
@@ -191,6 +191,7 @@ def interpolation(a):
 
 
 if __name__ == '__main__':
+    
     COM_PORT = 'COM6'    # 指定通訊埠名稱
     BAUD_RATES = 9600    # 設定傳輸速率
     arduino = serial.Serial(COM_PORT, BAUD_RATES)   # 初始化序列通訊埠
