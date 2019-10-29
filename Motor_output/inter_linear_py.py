@@ -1,6 +1,5 @@
-from scipy.interpolate import lagrange
+import serial
 from pylab import plt
-from numpy.polynomial.polynomial import Polynomial
 import numpy as np
 
 x = [
@@ -163,35 +162,48 @@ y = [
     1900,
 ]
 
-v1 = np.array(np.arange(-9, 11, 0.1))
-v2 = np.array(len(v1))
-c = np.arange(0, len(x))
+def binSearch(arr, l, r, x):
+    if x < arr[l]:
+        return -1
+    elif x > arr[r]:
+        return -2
+    
+    while r-l+1 > 2:
+        m = (l+r)/2
+        if arr[m] <= x:
+            l = m
+        else:
+            r = m - 1
+    
+    for i in range(r, l-1, -1):
+        if arr[i] <= x:
+            return i
+        
 
-poly_coe = lagrange(x, y)
-
-v2 = Polynomial._val(v1, c)
-print(v2)
-'''
-for i in v1:
-    v2.append(lagrange(x, y)(i))
-
-
-for i in range(len(v1)):
-    #v1.append(i)
-    v2.append(lagrange(v1[i]))
-'''
- 
-fig = plt.figure()
-ax = fig.subplots()
-p, = ax.plot(v1, v2, 'y.')
-plt.show()
+def interpolation(a):
+    index = binSearch(x, 0, len(x)-1, a)
+    
+    if index == -1:
+        return (y[1] - y[0]) / (x[1] - x[0]) * (a - x[0] + y[0])
+    if index == -2:
+        return (y[len(x)-1] - y[len(x)-2]) / (x[len(x)-1] - x[len(x)-2]) * (a - x[len(x)-2]) + y[len(x)-2]
+    return (y[index+1] - y[index]) / (x[index+1] - x[index]) * (a - x[index]) + y[index]
 
 
-print(len(y))
-print(len(x))
-
-for i in range(5):
-    a = float(input("Input a: "))
-    print(lagrange(x, y)(a))
-
-# poly1d([ -0.11111111,   0.33333333,  10.        ])
+if __name__ == '__main__':
+    COM_PORT = 'COM6'    # 指定通訊埠名稱
+    BAUD_RATES = 9600    # 設定傳輸速率
+    arduino = serial.Serial(COM_PORT, BAUD_RATES)   # 初始化序列通訊埠
+    
+    for i in range(10):
+        tar = float(input("Input: "))
+        result = int(interpolation(tar))
+        print(result)
+        
+        arduino.write(b'\x64')
+        arduino.write((result//100).to_bytes())
+        arduino.write((result%100).to_bytes())
+        
+        
+        
+        # output to arduino
