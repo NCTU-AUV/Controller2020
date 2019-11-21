@@ -1,6 +1,7 @@
 import numpy as np
 from numpy import pi,sin,cos
 import time
+from numpy import linalg
 class AUV():
 	def __init__(self):
 		#     there will be mass + damp + Coriolis +buoyancy
@@ -9,9 +10,9 @@ class AUV():
 		# ===================================================== #
 		self.mass_scaler = 27#kg
 		self.mass = self.mass_scaler*np.eye(3)
-		self.inertia = np.array([	[1,0,0],
-									[0,1,0],
-									[0,0,1]
+		self.inertia = np.array([	[1,1,1],
+									[1,1,1],
+									[1,1,1]
 								])
 		self.M_rb=np.append(np.append(self.mass,np.zeros((3,3)),axis=1),np.append(np.zeros((3,3)),self.inertia,axis=1),axis=0)
 
@@ -29,7 +30,7 @@ class AUV():
 		#                        Drag                           #
 		# ===================================================== #
 		
-		self.drag=np.eye(6)*np.array([[1,2,3,4,5,6]]).T
+		self.drag=np.eye(6)*np.array([[0,0,0,0,0,0]]).T
 		# ===================================================== #
 		#                        motor                          #
 		# ===================================================== #		
@@ -47,6 +48,9 @@ class AUV():
 		self.Trust = np.empty(shape=(0,6))
 		for i in self.motor:
 			self.Trust = np.vstack((self.Trust,np.append(i[0],np.cross(i[0],i[1]))))
+		self.Trust = self.Trust.T
+		self.Trust_inv = linalg.pinv(self.Trust)
+
 		# ===================================================== #
 		#                        attitude                       #
 		# ===================================================== #
@@ -85,7 +89,7 @@ class AUV():
  							])
  				)
  		'''
-
+'''
 Po=AUV()
 #print(Po.Trust)
 vel=np.array([[0.1,0,0,0,0,1]])
@@ -94,3 +98,4 @@ print(Po.M_rb)
 print(Po.mass_effect(np.array([[1,1,1,1,1,1]]).T))
 print(Po.coriolis_effect(vel))
 print(Po.drag_effect(vel))
+'''
