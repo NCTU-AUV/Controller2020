@@ -198,25 +198,25 @@ if __name__ == '__main__':
     # string = arduino.readline()
     
     arduino.flush()
-    for i in range(16):
-        input_data = [20, 10, 30, 40, 50, 60, 70, 80]
+    for i in range(100000000):
+        input_data = [65, 66, 67, 68, 69, 70, 71, 72]
         # subscribe a float array
         #output_data = b'\x64'
         output_data_num = []
         output_data_num.clear()
         for j in range(8):
             #tar = float(input("Input: "))
-            result = int(interpolation(input_data[j]))
-            print(result)            
-            output_data_num.append(int(result//256))
-            output_data_num.append(int(result%256))
+            #result = int(interpolation(input_data[j]))
+            #print(result)            
+            output_data_num.append(int(input_data[j]//256))
+            output_data_num.append(int(input_data[j]%256))
         #output_data = output_data + b'\x65'
         
         print(bytearray(output_data_num))
-        arduino.write(bytearray(output_data_num))
+        arduino.write(bytes([68]))
         
-        s = arduino.read(1000)
-        print(s)
+        #s = arduino.read(1000)
+        #print(s)
         #print(b'\x64')
         '''
         for j in range(8):
