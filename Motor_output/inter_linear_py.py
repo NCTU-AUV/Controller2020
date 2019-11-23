@@ -192,18 +192,62 @@ def interpolation(a):
 
 if __name__ == '__main__':
     
-    COM_PORT = 'COM6'    # 指定通訊埠名稱
-    BAUD_RATES = 9600    # 設定傳輸速率
+    COM_PORT = 'COM5'    # 指定通訊埠名稱
+    BAUD_RATES = 115200    # 設定傳輸速率
     arduino = serial.Serial(COM_PORT, BAUD_RATES)   # 初始化序列通訊埠
+    # string = arduino.readline()
     
-    for i in range(10):
-        tar = float(input("Input: "))
-        result = int(interpolation(tar))
-        print(result)
+    arduino.flush()
+    for i in range(16):
+        input_data = [20, 10, 30, 40, 50, 60, 70, 80]
+        # subscribe a float array
+        #output_data = b'\x64'
+        output_data_num = []
+        output_data_num.clear()
+        for j in range(8):
+            #tar = float(input("Input: "))
+            result = int(interpolation(input_data[j]))
+            print(result)            
+            output_data_num.append(int(result//256))
+            output_data_num.append(int(result%256))
+        #output_data = output_data + b'\x65'
         
-        arduino.write(b'\x64')
-        arduino.write((result//100).to_bytes())
-        arduino.write((result%100).to_bytes())
+        print(bytearray(output_data_num))
+        arduino.write(bytearray(output_data_num))
+        
+        s = arduino.read(1000)
+        print(s)
+        #print(b'\x64')
+        '''
+        for j in range(8):
+            print(input_data[j])            
+            arduino.write((input_data[j]//100).to_bytes(1, byteorder='big'))          
+            arduino.write((input_data[j]%100).to_bytes(1, byteorder='big'))
+            print((input_data[j]//100).to_bytes(1, byteorder='big'))          
+            print((input_data[j]%100).to_bytes(1, byteorder='big'))
+        '''
+        '''
+        for j in range(8):
+            for k in range(8):
+                arduino.write((k).to_bytes(1, byteorder='big'))
+                arduino.write((k+1).to_bytes(1, byteorder='big'))
+        arduino.write(b'\x65')
+        '''
+    '''
+    while 1:
+        strFromAri = arduino.readline()
+        print(strFromAri)
+    '''
+    
+    arduino.flush()
+    arduino.close()
+    
+    print("End.")
+        
+        # for j in range(8):
+        #     print("from Ar:")
+        #     string = arduino.readline()
+        #     print(string)
         
         
         
