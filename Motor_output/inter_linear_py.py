@@ -197,7 +197,7 @@ if __name__ == '__main__':
     arduino = serial.Serial(COM_PORT, BAUD_RATES)   # 初始化序列通訊埠
     # string = arduino.readline()
     
-    arduino.flush()
+    #arduino.flush()
     for i in range(100000000):
         input_data = [65, 66, 67, 68, 69, 70, 71, 72]
         # subscribe a float array
@@ -213,7 +213,7 @@ if __name__ == '__main__':
         #output_data = output_data + b'\x65'
         
         print(bytearray(output_data_num))
-        arduino.write(bytes([68]))
+        arduino.write(b'heool')
         
         #s = arduino.read(1000)
         #print(s)
