@@ -1,6 +1,7 @@
 import serial
-from pylab import plt
-import numpy as np
+from time import sleep
+#from pylab import plt
+#import numpy as np
 
 x = [
     -9,
@@ -192,63 +193,33 @@ def interpolation(a):
 
 if __name__ == '__main__':
     
-    COM_PORT = 'COM5'    # 指定通訊埠名稱
-    BAUD_RATES = 115200    # 設定傳輸速率
-    arduino = serial.Serial(COM_PORT, BAUD_RATES)   # 初始化序列通訊埠
+    COM_PORT = '/dev/ttyACM0'   
+    BAUD_RATES = 115200    
+    arduino = serial.Serial(COM_PORT, BAUD_RATES)   
     # string = arduino.readline()
     
     #arduino.flush()
-    for i in range(100000000):
-        input_data = [65, 66, 67, 68, 69, 70, 71, 72]
-        # subscribe a float array
-        #output_data = b'\x64'
+    for i in range(100):
+        input_data = [7565, 7566, 7667, 7668, 7769, 7770, 7871, 7872]
+        
         output_data_num = []
-        output_data_num.clear()
+        #output_data_num
+
+        #output_data_num.append(int())
         for j in range(8):
-            #tar = float(input("Input: "))
-            #result = int(interpolation(input_data[j]))
-            #print(result)            
-            output_data_num.append(int(input_data[j]//256))
-            output_data_num.append(int(input_data[j]%256))
-        #output_data = output_data + b'\x65'
+            output_data_num.append(int(input_data[j]//100))
+            output_data_num.append(int(input_data[j]%100))
         
-        print(bytearray(output_data_num))
-        arduino.write(b'heool')
+        #print(bytearray(output_data_num))
+        arduino.write(bytearray(output_data_num))
+        print(arduino.readline())
+
+        sleep(0.01)
         
-        #s = arduino.read(1000)
-        #print(s)
-        #print(b'\x64')
-        '''
-        for j in range(8):
-            print(input_data[j])            
-            arduino.write((input_data[j]//100).to_bytes(1, byteorder='big'))          
-            arduino.write((input_data[j]%100).to_bytes(1, byteorder='big'))
-            print((input_data[j]//100).to_bytes(1, byteorder='big'))          
-            print((input_data[j]%100).to_bytes(1, byteorder='big'))
-        '''
-        '''
-        for j in range(8):
-            for k in range(8):
-                arduino.write((k).to_bytes(1, byteorder='big'))
-                arduino.write((k+1).to_bytes(1, byteorder='big'))
-        arduino.write(b'\x65')
-        '''
-    '''
-    while 1:
-        strFromAri = arduino.readline()
-        print(strFromAri)
-    '''
     
     arduino.flush()
     arduino.close()
     
     print("End.")
         
-        # for j in range(8):
-        #     print("from Ar:")
-        #     string = arduino.readline()
-        #     print(string)
         
-        
-        
-        # output to arduino
