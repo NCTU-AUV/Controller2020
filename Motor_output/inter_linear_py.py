@@ -221,5 +221,29 @@ if __name__ == '__main__':
     arduino.close()
     
     print("End.")
-        
+
+
+# Corresponding arduino code
+'''
+
+void setup() {
+  Serial.begin(115200); // set the baud rate
+  Serial.setTimeout(7);
+  Serial.println("Ready"); // print "Ready" once
+}
+
+void loop() {
+  char inByte[19] ="";
+  String inData;
+  
+  if(Serial.available()){ // only send data back if data has been sent
+    Serial.readBytes(inByte,18);
+    //char inByte = Serial.read(); // read the incoming data
+    Serial.println(inByte); // send the data back in a new line so that it is not all one long line
+  }
+  
+  //delay(2); // delay for 1/10 of a second
+}
+
+'''        
         
