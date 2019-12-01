@@ -2,6 +2,25 @@ import numpy as np
 from numpy import pi,sin,cos
 import time
 from numpy import linalg
+import math
+def eulerAnglesToRotationMatrix(theta) :
+	
+	
+	R_x = np.array([[1,         0,                  0                   ],
+					[0,         math.cos(theta[0]), math.sin(theta[0]) ],
+					[0,         -math.sin(theta[0]), math.cos(theta[0])  ]
+					])
+	R_y = np.array([[math.cos(theta[1]),    0,      -math.sin(theta[1])  ],
+					[0,                     1,      0                   ],
+					[math.sin(theta[1]),   0,      math.cos(theta[1])  ]
+					])
+	R_z = np.array([[math.cos(theta[2]),    -math.sin(theta[2]),    0],
+					[math.sin(theta[2]),    math.cos(theta[2]),     0],
+					[0,                     0,                      1]
+					])
+	R = np.dot(R_z, np.dot( R_y, R_x ))
+	return R 
+
 class AUV():
 	def __init__(self):
 		#     there will be mass + damp + Coriolis +buoyancy
@@ -10,9 +29,9 @@ class AUV():
 		# ===================================================== #
 		self.mass_scaler = 27#kg
 		self.mass = self.mass_scaler*np.eye(3)
-		self.inertia = np.array([	[1,1,1],
-									[1,1,1],
-									[1,1,1]
+		self.inertia = np.array([	[850.98,0,0],
+									[0,935.11,0],
+									[0,0,1257.2]
 								])
 		self.M_rb=np.append(np.append(self.mass,np.zeros((3,3)),axis=1),np.append(np.zeros((3,3)),self.inertia,axis=1),axis=0)
 

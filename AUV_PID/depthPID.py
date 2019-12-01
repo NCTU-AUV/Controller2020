@@ -106,15 +106,16 @@ class Main():
         elif depth_error < -0.4:
             depth_force[2] = -30
         else:
-            self.depth_error_I = self.depth_error_I*0.5+depth_error
+            self.depth_error_I = self.depth_error_I*0.8+depth_error
             depth_error_D = depth_error - self.last_error
+            self.last_error = depth_error
             depth_force[2] = Kp*depth_error +  Ki*self.depth_error_I + Kd*depth_error_D
         a = self.Po.buoyancy_effect()
         depth_force[2] = depth_force[2] - a[2][0]
         depth_force = np.dot(self.Po.Trust_inv,depth_force)
         print(depth_force)
-        data = Float32MultiArray(data = depth_force)
-        self.depth_pub.publish(data)
+        force_data = Float32MultiArray(data = depth_force)
+        self.depth_pub.publish(force_data)
         print(time.time()-tStart)
     def Kp_cb():
         pass

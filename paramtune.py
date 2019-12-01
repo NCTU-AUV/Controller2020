@@ -100,7 +100,7 @@ class Main():
         ################################################################################
         #                               altitude PID                                   #
         ################################################################################
-        altitude_PID=rospy.get_param('/altitude_PID')
+        altitude_PID=rospy.get_param('/PIDpara/altitude')
         altitude_PID_digit = []
         altitude_PID_num = []
         for i in altitude_PID:
@@ -136,17 +136,16 @@ class Main():
         ################################################################################
         #===============      for depth  ====================#
         self.x_count = 0
-        self.depth_x = np.arange(1,101)
+        self.depth_x = np.arange(0,100)
         self.ddata =  np.zeros(100)
-        rospy.Subscriber("/depth", Float32, self.depth_back)
         self.depth_fig =Figure(figsize=(5,3), dpi=100)
         self.depth_ax=self.depth_fig.add_subplot(111)
         self.depth_ax.set_ylim((0, 5))
         self.depth_ax.set_title("depth")
-        self.canvas_T =FigureCanvasTkAgg(self.depth_fig, master=graph)
-        self.canvas_T.show()
-        self.canvas_T.get_tk_widget().pack(side=tk.TOP,fill="both")
-
+        self.canvas_d =FigureCanvasTkAgg(self.depth_fig, master=graph)
+        self.canvas_d.show()
+        self.canvas_d.get_tk_widget().pack(side=tk.TOP,fill="both")
+        rospy.Subscriber("/depth", Float32, self.depth_back, queue_size=1)
         scale_frame.mainloop()
     def set_depth(self):
         data = []
@@ -161,7 +160,7 @@ class Main():
         data.append(self.s_a_I.get()*10**float(self.combo_a_I.get()))
         data.append(self.s_a_D.get()*10**float(self.combo_a_D.get()))
         print data
-        rosparam.set_param('/altitude_PID', str(data))
+        rosparam.set_param('/PIDpara/altitude', str(data))
     def dump_depth(self):
         data = []
         data.append(self.s_d_P.get()*10**float(self.combo_d_P.get()))
@@ -176,13 +175,15 @@ class Main():
         data.append(self.s_a_P.get()*10**float(self.combo_a_P.get()))
         data.append(self.s_a_I.get()*10**float(self.combo_a_I.get()))
         data.append(self.s_a_D.get()*10**float(self.combo_a_D.get()))
-        dict_data = {'/altitude_PID':data}
+        dict_data = {'/PIDpara/altitude':data}
         print dict_data
         with open(r'/home/eason27271563/catkin_ws/src/beginner_tutorials/config/altitude.yaml','w+') as f:
             print yaml.dump(dict_data,f, default_flow_style = False)
     def depth_back(self,data):
         #print(data.data)
         if self.x_count>99:
+            self.x_count+=1
+            
             self.ddata=np.roll(self.ddata,-1)
             self.ddata[99]=data.data
             self.depth_x=np.roll(self.depth_x,-1)
@@ -191,14 +192,16 @@ class Main():
             self.depth_ax.set_xlim((self.depth_x[0], self.depth_x[99]))
             self.depth_ax.set_ylim((0, 5))
             self.depth_ax.plot(self.depth_x,self.ddata)
+            print(self.depth_x[99])
         else:
             self.ddata[self.x_count]=data.data
             self.x_count+=1
+            
             self.depth_ax.cla()
             self.depth_ax.set_ylim((0, 5))
             self.depth_ax.plot(self.depth_x,self.ddata)
         self.depth_ax.set_title("depth")
-        self.canvas_T.draw()
+        self.canvas_d.draw()
 if __name__ == "__main__":
     try:
         Main()
