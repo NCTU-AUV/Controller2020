@@ -72,6 +72,8 @@ def state_cb(data):
 class Main():
     def __init__(self):
         rospy.init_node('depth_PID', anonymous=True)
+        self.state = 0 
+        rospy.Subscriber('/AUVmanage/state',Int32,self.state_change)
         self.Po = AUV_physics.AUV()
         self.depth_target = 1.
         rospy.Subscriber('/depth', Float32, self.depth_cb)
@@ -89,36 +91,39 @@ class Main():
 	            except Exception as e:
 	                exstr = traceback.format_exc()
 	                print(exstr)
-            
-            
 
     def depth_cb(self,data):
-        tStart = time.time()
-        depth_data=data.data
-        Kp = self.depth_PID[0]
-        Ki = self.depth_PID[1]
-        Kd = self.depth_PID[2]
-        depth_error = self.depth_target-depth_data
-        rospy.loginfo('depth error is :' + str(depth_error))
-        depth_force = [0,0,0,0,0,0]
-        if depth_error > 0.4:
-            depth_force[2] = 30
-        elif depth_error < -0.4:
-            depth_force[2] = -30
-        else:
-            self.depth_error_I = self.depth_error_I*0.8+depth_error
-            depth_error_D = depth_error - self.last_error
-            self.last_error = depth_error
-            depth_force[2] = Kp*depth_error +  Ki*self.depth_error_I + Kd*depth_error_D
-        a = self.Po.buoyancy_effect()
-        depth_force[2] = depth_force[2] - a[2][0]
-        depth_force = np.dot(self.Po.Trust_inv,depth_force)
-        print(depth_force)
-        force_data = Float32MultiArray(data = depth_force)
-        self.depth_pub.publish(force_data)
-        print(time.time()-tStart)
+        if self.state == 1: #normal state
+            tStart = time.time()
+            depth_data=data.data
+            Kp = self.depth_PID[0]
+            Ki = self.depth_PID[1]
+            Kd = self.depth_PID[2]
+            depth_error = self.depth_target-depth_data
+            rospy.loginfo('depth error is :' + str(depth_error))
+            depth_force = [0,0,0,0,0,0]
+            if depth_error > 0.4:
+                depth_force[2] = 30
+            elif depth_error < -0.4:
+                depth_force[2] = -30
+            else:
+                self.depth_error_I = self.depth_error_I*0.8+depth_error
+                depth_error_D = depth_error - self.last_error
+                self.last_error = depth_error
+                depth_force[2] = Kp*depth_error +  Ki*self.depth_error_I + Kd*depth_error_D
+            a = self.Po.buoyancy_effect()
+            depth_force[2] = depth_force[2] - a[2][0]
+            depth_force = np.dot(self.Po.Trust_inv,depth_force)
+            print(depth_force)
+            force_data = Float32MultiArray(data = depth_force)
+            self.depth_pub.publish(force_data)
+            print(time.time()-tStart)
+        if self.state == 0:
+            self.depth_pub.publish(Float32MultiArray(data = [0,0,0,0,0,0,0,0]))
     def Kp_cb():
         pass
+    def state_change(self,data):
+        self.state = data.data
 
 if __name__ == "__main__":
     try:

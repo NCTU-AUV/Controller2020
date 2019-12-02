@@ -49,7 +49,7 @@ class AUV():
 		#                        Drag                           #
 		# ===================================================== #
 		
-		self.drag=np.eye(6)*np.array([[0,0,0,0,0,0]]).T
+		self.drag=np.eye(6)*np.array([[1500,1500,1500,0,0,0]]).T
 		# ===================================================== #
 		#                        motor                          #
 		# ===================================================== #		
@@ -90,7 +90,7 @@ class AUV():
 		Coriolis_l = 2*np.cross(mass*vel[0][3:6],vel[0][0:3]*pi/180)
 		print(Coriolis_l)
 	def drag_effect(self,vel):
-		return self.drag.dot(vel.T)
+		return self.drag.dot(vel.T*vel.T)
 	def buoyancy_effect(self):
 		g=self.gravity()
 		#                   
