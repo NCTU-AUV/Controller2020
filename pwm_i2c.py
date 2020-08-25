@@ -9,7 +9,7 @@ from smbus2 import SMBus
 import time
 
 pca9685_addr = 0x40
-sus = SMBus(1)
+bus = SMBus(1)
 
 def set_PWM_ON(addr, ch, value):
     low_byte_val = value & 0x00FF
@@ -41,6 +41,8 @@ def init(freq = 50):
     bus.write_i2c_block_data(pca9685_addr, 0x00, [0x01])
     for i in range(16):
         set_PWM_ON(pca9685_addr, i, 0)
+	for i in range(16):
+		set_motor(i, 330)    # send start signal
 
 def main():
     init()
