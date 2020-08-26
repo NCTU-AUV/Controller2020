@@ -14,8 +14,8 @@ from smbus2 import SMBus
 import time
 import sys
 import numpy as np
-# import rospy
-# from std_msgs.msg import Float32MultiArray
+import rospy
+from std_msgs.msg import Float32MultiArray, Float32
 
 pca9685_addr = 0x40
 bus = SMBus(1)
@@ -83,12 +83,15 @@ def init(freq=71):
 class MotorController:
     def __init__(self):
         listener = rospy.Subscriber(
-            'Motor_forces', Float32MultiArray, self.callback)
+            'Motors_Force', Float32MultiArray, self.callback)
 
     def callback(self, data):
-        cmd = list(np.interp(data.data, FORCE, CONTROLL))
+        print(type(data.data))
+        cmd = np.interp(data.data, FORCE, CONTROLL)
         cmd = [self.fuse(val) for val in cmd]
-        set_motor(1, cmd[0])
+        #cmd = self.fuse(cmd)
+        print('final', cmd[1])
+        set_motor(1, cmd[1])
         rospy.loginfo(data)
     
     def fuse(self, val):
@@ -100,29 +103,21 @@ class MotorController:
             return 530
         return int(val) 
 
-
-def main():
-    init()
-
-    #set_PWM_OFF(pca9685_addr, 1, 330)
-    # time.sleep(1)
-    #set_PWM_OFF(pca9685_addr, 1, 340)
-    try:
-        while True:
-            #motor = int(input('motor: '))
-            val = int(input('val: '))
-            set_motor(1, val)
-            '''
-            for i in range(4096):
-                set_PWM_OFF(pca9685_addr, 0, i)
-                print(i)
-                time.sleep(0.5)
-            '''
-    except KeyboardInterrupt:
+def shutdown():
         for i in range(16):
             set_motor(i, 0)
         print('\nstop')
 
+def main(args):
+    init()
+    MotorController()
+    rospy.init_node('Motor_Controller', anonymous=True)
+    rospy.on_shutdown(shutdown)
+ 
+    try:
+        rospy.spin()
+    except KeyboardInterrupt:
+        print('bye')
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv)
