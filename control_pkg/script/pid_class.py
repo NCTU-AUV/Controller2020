@@ -34,11 +34,15 @@ class PID:
     """PID Controller
     """
 
-    def __init__(self, P=0.2, I=0.0, D=0.0):
+    def __init__(self, P_roll=0.2, I_roll=0.0, D_roll=0.0, P_pitch=0.2, I_pitch=0.0, D_pitch=0.0):
 
-        self.Kp = P
-        self.Ki = I
-        self.Kd = D
+        self.Kp_roll = P_roll
+        self.Ki_roll = I_roll
+        self.Kd_roll = D_roll
+
+        self.Kp_pitch = P_pitch
+        self.Ki_pitch = I_pitch
+        self.Kd_pitch = D_pitch
 
         self.sample_time = 0.00
         self.current_time = time.time()
@@ -48,22 +52,29 @@ class PID:
 
     def clear(self):
         """Clears PID computations and coefficients"""
-        self.SetPoint = 0.0
+        self.SetPoint_roll = 0.0
+        self.SetPoint_pitch = 0.0
 
-        self.PTerm = 0.0
-        self.ITerm = 0.0
-        self.DTerm = 0.0
-        self.last_error = 0.0
+        self.PTerm_roll = 0.0
+        self.ITerm_roll = 0.0
+        self.DTerm_roll = 0.0
+        self.PTerm_pitch = 0.0
+        self.ITerm_pitch = 0.0
+        self.DTerm_pitch = 0.0
+
+        self.last_error_roll = 0.0
+        self.last_error_pitch = 0.0
 
         # Windup Guard
         self.int_error = 0.0
         self.windup_guard = 20.0
 
-        self.output = 0.0
+        self.output_roll = 0.0
+        self.output_pitch = 0.0
 
-    def update(self, feedback_value):
+    def update_RollandPitch(self, feedback_value_roll, feedback_value_pitch):
         """
-        Calculates PID value for given reference feedback
+        Calculates PID value for given eference feedback
 
         .. math::
             u(t) = K_p e(t) + K_i / int_{0}^{t} e(t)dt + K_d {de}/{dt}
@@ -74,45 +85,76 @@ class PID:
            Test PID with Kp=1.2, Ki=1, Kd=0.001 (test_pid.py)
 
         """
-        error = self.SetPoint - feedback_value
+        error_roll = self.SetPoint_roll - feedback_value_roll
+        error_pitch = self.SetPoint_pitch - feedback_value_pitch
 
         self.current_time = time.time()
         delta_time = self.current_time - self.last_time
-        delta_error = error - self.last_error
 
         if (delta_time >= self.sample_time):
-            self.PTerm = self.Kp * error
-            self.ITerm += error * delta_time
+            self.PTerm_roll = self.Kp_roll * error_roll
+            self.PTerm_pitch = self.Kp_pitch * error_pitch
 
-            if (self.ITerm < -self.windup_guard):
-                self.ITerm = -self.windup_guard
-            elif (self.ITerm > self.windup_guard):
-                self.ITerm = self.windup_guard
+            self.ITerm_roll += error_roll * delta_time
+            self.ITerm_pitch += error_pitch * delta_time
 
-            self.DTerm = 0.0
-            if delta_time > 0:
-                self.DTerm = delta_error / delta_time
+            if (self.ITerm_roll < -self.windup_guard):
+                self.ITerm_roll = -self.windup_guard
+            elif (self.ITerm_roll > self.windup_guard):
+                self.ITerm_roll = self.windup_guard
+            
+            if (self.ITerm_pitch < -self.windup_guard):
+                self.ITerm_pitch = -self.windup_guard
+            elif (self.ITerm_pitch > self.windup_guard):
+                self.ITerm_pitch = self.windup_guard
 
             # Remember last time and last error for next calculation
             self.last_time = self.current_time
-            self.last_error = error
+            self.last_error_roll = error_roll
+            self.last_error_pitch = error_pitch
 
-            self.output = self.PTerm + (self.Ki * self.ITerm) + (self.Kd * self.DTerm)
+            self.output_roll = self.PTerm_roll + (self.Ki_roll * self.ITerm_roll) + (self.Kd_roll * self.DTerm_roll)
+            self.output_pitch = self.PTerm_pitch + (self.Ki_pitch * self.ITerm_pitch) + (self.Kd_pitch * self.DTerm_pitch)
             
-        return self.output
+        return [self.output_roll, self.PTerm_pitch]
         
+    def setDTerm_roll(self, Dterm):
+        self.DTerm_roll = Dterm
+    
+    def setDTerm_pitch(self, Dterm):
+        self.DTerm_pitch = Dterm
 
-    def setKp(self, proportional_gain):
+    def setAllCoeff(self, k):
+        self.Kp_roll = k[0]
+        self.Ki_roll = k[1]
+        self.Kd_roll = k[2]
+        self.Kp_pitch = k[3]
+        self.Ki_pitch = k[4]
+        self.Kd_pitch = k[5]
+
+    def setKp_roll(self, proportional_gain):
         """Determines how aggressively the PID reacts to the current error with setting Proportional Gain"""
-        self.Kp = proportional_gain
+        self.Kp_roll = proportional_gain
 
-    def setKi(self, integral_gain):
+    def setKi_roll(self, integral_gain):
         """Determines how aggressively the PID reacts to the current error with setting Integral Gain"""
-        self.Ki = integral_gain
+        self.Ki_roll = integral_gain
 
-    def setKd(self, derivative_gain):
+    def setKd_roll(self, derivative_gain):
         """Determines how aggressively the PID reacts to the current error with setting Derivative Gain"""
-        self.Kd = derivative_gain
+        self.Kd_roll = derivative_gain
+
+    def setKp_pitch(self, proportional_gain):
+        """Determines how aggressively the PID reacts to the current error with setting Proportional Gain"""
+        self.Kp_pitch = proportional_gain
+
+    def setKi_pitch(self, integral_gain):
+        """Determines how aggressively the PID reacts to the current error with setting Integral Gain"""
+        self.Ki_pitch = integral_gain
+
+    def setKd_pitch(self, derivative_gain):
+        """Determines how aggressively the PID reacts to the current error with setting Derivative Gain"""
+        self.Kd_pitch = derivative_gain
 
     def setWindup(self, windup):
         """Integral windup, also known as integrator windup or reset windup,
@@ -132,5 +174,8 @@ class PID:
         """
         self.sample_time = sample_time
 
-    def setSetPoint(self, set_point):
-        self.SetPoint = set_point
+    def setSetPoint_roll(self, set_point_roll):
+        self.SetPoint_roll = set_point_roll
+    
+    def setSetPoint_pitch(self, set_point_pitch):
+        self.SetPoint_pitch = set_point_pitch
