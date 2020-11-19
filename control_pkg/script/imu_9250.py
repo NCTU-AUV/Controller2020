@@ -29,18 +29,20 @@ class IMUAttitude:
             # attitude = [random.random()*10 for _ in range(2)]
             try:
                 raw_data = self.arduino.readline()
+                #print('arduino raw data: ')
+                #print(raw_data)
                 attitude = [float(val) for val in raw_data.split()]
-                # print(raw_data)
-                # time.sleep(0.5)
-                print(attitude)
-                self.pub.publish(Float64MultiArray(data=attitude))
-                rospy.loginfo(attitude)
-            except Exception:
+            except Exception as e:
                 print('oops')
-                print(Exception)
+                print(e)
+                # time.sleep(0.5)
+                #print(attitude)
+            self.pub.publish(Float64MultiArray(data=attitude))
+            #rospy.loginfo(attitude)
             
 
     def shutdown(self):
+        self.arduino.close()
         print('\nbye')
 
 def main():

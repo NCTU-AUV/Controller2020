@@ -1,3 +1,7 @@
+'''
+https://www.learnpyqt.com/courses/graphics-plotting/plotting-pyqtgraph/
+https://www.cnblogs.com/linyfeng/p/12239856.html
+'''
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtCore import pyqtSignal
 from pyqtgraph import PlotWidget, plot

@@ -17,7 +17,7 @@ import time
 import sys
 import numpy as np
 import rospy
-from std_msgs.msg import Float32MultiArray, Float32
+from std_msgs.msg import Float64MultiArray, Float32
 
 
 class MotorController:
@@ -73,7 +73,7 @@ class MotorController:
     def __init__(self):
         self.motor_init()
         listener = rospy.Subscriber(
-            'Motors_Force', Float32MultiArray, self.callback)
+            'Motors_Force', Float64MultiArray, self.callback)
 
     def motor_init(self, freq=71):
         # Set PWM frequency
@@ -91,25 +91,26 @@ class MotorController:
         
         for i in range(16):
             self.set_PWM_ON(self.pca9685_addr, i, 0)
-        # for i in range(8):
-        #     set_motor(i, 468)    # send start signal
-        self.set_motor(1, 468)
+        for i in range(8):
+            self.set_motor(i, 468)    # send start signal
+        #self.set_motor(1, 468)
         
         ''' Check the desired frequnency is written to register '''
         # print('freq signal: ' + str(self.bus.read_byte_data(self.pca9685_addr, 0xFE)))
 
     @classmethod
     def callback(cls, data):
-        print(type(data.data))
+        #print(type(data.data))
         cmd = np.interp(data.data, cls.FORCE, cls.CONTROLL)
         cmd = [cls.fuse(val) for val in cmd]
         
-        '''
+        
         for i in range(8):
             cls.set_motor(i, cmd[i])
-        '''
-        cls.set_motor(1, cmd[1])
-        rospy.loginfo(data)
+        
+        #cls.set_motor(1, cmd[1])
+        rospy.loginfo('motor %d final control: %d', 1, cmd[1])
+        #rospy.loginfo(data)
 
     ''' Set a fuse for motor max controlling '''
     @staticmethod

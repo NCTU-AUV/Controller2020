@@ -8,14 +8,14 @@ import rospy
 
 #Coefficient of PID
 #roll
-kp1 = 0.01
-ki1 = 0.01
-kd1 = 0.01
+kp1 = 1e4
+ki1 = 0 #0.01
+kd1 = 0 #0.01
 
 #pitch
-kp2 = 0.01
-ki2 = 0.01
-kd2 = 0.01
+kp2 = 1e4
+ki2 = 0 #0.01
+kd2 = 0 #0.01
 pid = pid_class.PID(kp1, ki1, kd1, kp2, ki2, kd2)
 
 motor = [0.0]*8
@@ -52,17 +52,17 @@ def pid_control_server():
     # rospy.init_node('pid_control_server')
     s = rospy.Service('pid_control', PidControl, handle_pid_control)
     print("Ready to get control msg.")
-    rospy.spin()
+    #rospy.spin()
 
 def callback(data):
-    rospy.loginfo(rospy.get_caller_id() + "%s", data.data)
+    #rospy.loginfo(rospy.get_caller_id() + "%s", data.data)
     
     #D term = w
-    pid.setDTerm_roll(data.data[3])
-    pid.setDTerm_pitch(data.data[5])
+    pid.setDTerm_roll(data.data[0])
+    pid.setDTerm_pitch(data.data[2])
     
     feedback = pid.update_RollandPitch(data.data[0], data.data[2])
-    print(feedback)
+    #print(feedback)
     update_motor(feedback)
 
     talker()
@@ -76,35 +76,35 @@ def update_motor(feedback):
     if feedback[0] > 0:
         for i in range(3):
             if motor[i] < 5:
-                motor[i] += 1
+                motor[i] += 0.1
         if motor[3] > -5:        
-            motor[3] += -1
+            motor[3] += -0.1
 
     elif feedback[0] < 0:
         for i in range(3):
             if motor[i] > -5:
-                motor[i] += -1
+                motor[i] += -0.1
         if motor[3] < 5:  
-            motor[3] += 1
+            motor[3] += 0.1
 
     if feedback[1] > 0:
         for i in range(1, 4):
             if motor[i] < 5:
-                motor[i] += 1
+                motor[i] += 0.1
         if motor[0] > -5:
-            motor[0] += -1
+            motor[0] += -0.1
     elif feedback[1] < 0:
         if motor[0] > -5:
-            motor[0] += -1
+            motor[0] += -0.1
         if motor[1] > -5:
-            motor[1] += -1
+            motor[1] += -0.1
         if motor[2] < 5:
-            motor[2] += 1
+            motor[2] += 0.1
         if motor[3] > -5:
-            motor[3] += -1
+            motor[3] += -0.1
 
 def talker():
-    rospy.loginfo(Float64MultiArray(data = motor))
+    rospy.loginfo(motor)
     pub.publish(Float64MultiArray(data = motor))
 
 if __name__ == '__main__':

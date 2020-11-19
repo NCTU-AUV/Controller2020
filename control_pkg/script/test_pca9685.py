@@ -1,3 +1,5 @@
+# fixed output frequency to test pwm emulator
+
 #! /usr/bin/env python3
 
 '''
@@ -8,8 +10,6 @@ O/P: controll motors
 PCA9685 I2C
 http://blog.ittraining.com.tw/2015/07/raspberry-pi2-python-i2c-16-pwm-pca9685.html
 
-Datasheet of T200
-https://bluerobotics.com/store/thrusters/t100-t200-thrusters/t200-thruster/
 '''
 
 from smbus2 import SMBus
@@ -72,8 +72,6 @@ class MotorController:
 
     def __init__(self):
         self.motor_init()
-        listener = rospy.Subscriber(
-            'Motors_Force', Float32MultiArray, self.callback)
 
     def motor_init(self, freq=71):
         # Set PWM frequency
@@ -82,36 +80,28 @@ class MotorController:
         '''
         freq_raw = 85 (freq approximatly 71)
         will make steps equaling width with the datasheet of T200
-        If want to change the frequency, need to set pca9685 to sleep mode
         '''
         self.set_sleep(self.pca9685_addr)
         self.bus.write_byte_data(self.pca9685_addr, 0xFE, freq_raw)
         self.unset_sleep(self.pca9685_addr)
 
-        
         for i in range(16):
             self.set_PWM_ON(self.pca9685_addr, i, 0)
-        # for i in range(8):
-        #     set_motor(i, 468)    # send start signal
-        self.set_motor(1, 468)
-        
-        ''' Check the desired frequnency is written to register '''
-        # print('freq signal: ' + str(self.bus.read_byte_data(self.pca9685_addr, 0xFE)))
+        for i in range(8):
+            self.set_motor(i, 468)    # send start signal
+        # self.set_motor(1, 468)
+        print('freq signal: ' + str(self.bus.read_byte_data(self.pca9685_addr, 0xFE)))
 
     @classmethod
     def callback(cls, data):
         print(type(data.data))
         cmd = np.interp(data.data, cls.FORCE, cls.CONTROLL)
         cmd = [cls.fuse(val) for val in cmd]
-        
-        '''
-        for i in range(8):
-            cls.set_motor(i, cmd[i])
-        '''
+        #cmd = cls.fuse(cmd)
+        print('final', cmd[1])
         cls.set_motor(1, cmd[1])
         rospy.loginfo(data)
 
-    ''' Set a fuse for motor max controlling '''
     @staticmethod
     def fuse(val):
         if 461 <= val <= 474:
@@ -126,7 +116,6 @@ class MotorController:
     def set_motor(cls, motor, val):
         cls.set_PWM_OFF(cls.pca9685_addr, motor, val)
 
-    ''' Will be called if press ctrl+C '''
     @classmethod
     def shutdown(cls):
         for i in range(16):
@@ -171,14 +160,9 @@ class MotorController:
 
 def main(args):
     MotorController()
-    rospy.init_node('Motor_Controller', anonymous=True)
-    rospy.on_shutdown(MotorController.shutdown)
-
-    try:
-        rospy.spin()
-    except KeyboardInterrupt:
-        print('bye')
-
+    for i in range(8):
+        MotorController.set_motor(i, 450)
+    MotorController.set_motor(1, 450)
 
 if __name__ == '__main__':
     main(sys.argv)
