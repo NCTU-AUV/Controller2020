@@ -1,1 +1,5 @@
 *.swp
+git 
+# ignore python cache
+**/__pycache__/
+*.py[cod]
