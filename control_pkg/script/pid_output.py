@@ -17,6 +17,9 @@ kp2 = 1e4
 ki2 = 0 #0.01
 kd2 = 0 #0.01
 pid = pid_class.PID(kp1, ki1, kd1, kp2, ki2, kd2)
+limit = 100
+K_roll = 1
+K_pitch = 1
 
 motor = [0.0]*8
 
@@ -24,8 +27,8 @@ motor = [0.0]*8
 #       4-5 thrust
 #       6-7 direction
 #               
-#      u       <-        3
-#      0        7        D
+#      u       <-        u
+#      0        7        3
 #       -----------------
 #       |               |
 #    4  |               |  5
@@ -73,35 +76,39 @@ def listener():
 
 def update_motor(feedback):
     global motor
-    if feedback[0] > 0:
-        for i in range(3):
-            if motor[i] < 5:
-                motor[i] += 0.1
-        if motor[3] > -5:        
-            motor[3] += -0.1
+    global limit
+    global K_roll
+    global K_pitch
+    value_roll = feedback[0] * K_roll
+    value_pitch = feedback[1] * K_pitch
 
-    elif feedback[0] < 0:
-        for i in range(3):
-            if motor[i] > -5:
-                motor[i] += -0.1
-        if motor[3] < 5:  
-            motor[3] += 0.1
+    if m[0] - value_roll - value_pitch < -limit:
+        m[0] = -limit
+    elif m[0] - value_roll - value_pitch > limit:
+        m[0] = limit
+    else:
+        m[0] -= value_roll - value_pitch
+    
+    if m[1] - value_roll + value_pitch < -limit:
+        m[1] = -limit
+    elif m[1] - value_roll + value_pitch > limit:
+        m[1] = limit
+    else:
+        m[1] -= value_roll + value_pitch
 
-    if feedback[1] > 0:
-        for i in range(1, 4):
-            if motor[i] < 5:
-                motor[i] += 0.1
-        if motor[0] > -5:
-            motor[0] += -0.1
-    elif feedback[1] < 0:
-        if motor[0] > -5:
-            motor[0] += -0.1
-        if motor[1] > -5:
-            motor[1] += -0.1
-        if motor[2] < 5:
-            motor[2] += 0.1
-        if motor[3] > -5:
-            motor[3] += -0.1
+    if m[2] + value_roll + value_pitch < -limit:
+        m[2] = -limit
+    elif m[2] + value_roll + value_pitch > limit:
+        m[2] = limit
+    else:
+        m[2] += value_roll + value_pitch 
+
+    if m[3] + value_roll - value_pitch < -limit:
+        m[3] = -limit
+    elif m[3] + value_roll - valur_pitch > limit:
+        m[3] = limit
+    else:
+        m[3] += value_roll - value_pitch
 
 def talker():
     rospy.loginfo(motor)
