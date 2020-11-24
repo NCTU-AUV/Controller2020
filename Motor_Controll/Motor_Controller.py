@@ -78,7 +78,7 @@ class MotorController:
     def motor_init(self, freq=71):
         # Set PWM frequency
         freq_raw = round(25000000 / (4096 * freq)) - 1
-        print(freq_raw)
+        print('pca_9685 freq_raw: ', freq_raw)
         '''
         freq_raw = 85 (freq approximatly 71)
         will make steps equaling width with the datasheet of T200
