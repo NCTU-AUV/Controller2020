@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 import rospy
 from std_msgs.msg import Float64MultiArray
 import pid_class
@@ -82,33 +83,33 @@ def update_motor(feedback):
     value_roll = feedback[0] * K_roll
     value_pitch = feedback[1] * K_pitch
 
-    if m[0] - value_roll - value_pitch < -limit:
-        m[0] = -limit
-    elif m[0] - value_roll - value_pitch > limit:
-        m[0] = limit
+    if motor[0] - value_roll - value_pitch < -limit:
+        motor[0] = -limit
+    elif motor[0] - value_roll - value_pitch > limit:
+        motor[0] = limit
     else:
-        m[0] -= value_roll - value_pitch
+        motor[0] -= value_roll - value_pitch
     
-    if m[1] - value_roll + value_pitch < -limit:
-        m[1] = -limit
-    elif m[1] - value_roll + value_pitch > limit:
-        m[1] = limit
+    if motor[1] - value_roll + value_pitch < -limit:
+        motor[1] = -limit
+    elif motor[1] - value_roll + value_pitch > limit:
+        motor[1] = limit
     else:
-        m[1] -= value_roll + value_pitch
+        motor[1] -= value_roll + value_pitch
 
-    if m[2] + value_roll + value_pitch < -limit:
-        m[2] = -limit
-    elif m[2] + value_roll + value_pitch > limit:
-        m[2] = limit
+    if motor[2] + value_roll + value_pitch < -limit:
+        motor[2] = -limit
+    elif motor[2] + value_roll + value_pitch > limit:
+        motor[2] = limit
     else:
-        m[2] += value_roll + value_pitch 
+        motor[2] += value_roll + value_pitch 
 
-    if m[3] + value_roll - value_pitch < -limit:
-        m[3] = -limit
-    elif m[3] + value_roll - valur_pitch > limit:
-        m[3] = limit
+    if motor[3] + value_roll - value_pitch < -limit:
+        motor[3] = -limit
+    elif motor[3] + value_roll - value_pitch > limit:
+        motor[3] = limit
     else:
-        m[3] += value_roll - value_pitch
+        motor[3] += value_roll - value_pitch
 
 def talker():
     rospy.loginfo(motor)
