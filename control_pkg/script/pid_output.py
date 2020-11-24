@@ -66,7 +66,7 @@ def handle_pid_control(req):
 
     print("Get control msg [%f %f %f %f %f %f %f %f %f %f %f %f]"%(kp1, order_p1, ki1, order_i1, kd1, order_d1
         , kp2, order_p2, ki2, order_i2, kd2, order_d2))
-        
+
     pid.setAllCoeff( [kp1 * math.pow(order_p1), ki1 * math.pow(order_i1), kd1 * math.pow(order_d1), kp2 * math.pow(order_p2)
                     , ki2 * math.pow(order_i2), kd2 * math.pow(order_d2)] )
 
@@ -104,7 +104,10 @@ def update_motor(feedback):
     value_pitch = feedback[1] * K_pitch
 
     value = []
-    value[4] = { -value_roll - value_pitch,  -value_roll + value_pitch, value_roll + value_pitch, value_roll - value_pitch}
+    value[0] = -value_roll - value_pitch
+    value[1] = -value_roll + value_pitch
+    value[2] = value_roll + value_pitch
+    value[3] = value_roll - value_pitch
 
     for i in range(4):
         if motor[i] + value[i] < -limit:
