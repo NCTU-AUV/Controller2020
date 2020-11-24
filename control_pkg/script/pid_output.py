@@ -25,8 +25,8 @@ order_i2 = 0
 kd2 = 0 #0.01
 order_d2 = 0
 
-pid = pid_class.PID(kp1 * math.pow(order_p1), ki1 * math.pow(order_i1), kd1 * math.pow(order_d1), kp2 * math.pow(order_p2)
-                    , ki2 * math.pow(order_i2), kd2 * math.pow(order_d2))
+pid = pid_class.PID(math.pow(kp1, order_p1), math.pow(ki1, order_i1), math.pow(kd1, order_d1), math.pow(kp2, order_p2)
+                    , math.pow(ki2, order_i2), math.pow(kd2, order_d2))
 limit = 100
 K_roll = 1
 K_pitch = 1
@@ -67,8 +67,8 @@ def handle_pid_control(req):
     print("Get control msg [%f %f %f %f %f %f %f %f %f %f %f %f]"%(kp1, order_p1, ki1, order_i1, kd1, order_d1
         , kp2, order_p2, ki2, order_i2, kd2, order_d2))
 
-    pid.setAllCoeff( [kp1 * math.pow(order_p1), ki1 * math.pow(order_i1), kd1 * math.pow(order_d1), kp2 * math.pow(order_p2)
-                    , ki2 * math.pow(order_i2), kd2 * math.pow(order_d2)] )
+    pid.setAllCoeff( [math.pow(kp1, order_p1), math.pow(ki1, order_i1), math.pow(kd1, order_d1), math.pow(kp2, order_p2)
+                    , math.pow(ki2, order_i2), math.pow(kd2, order_d2)] )
 
     return PidControlResponse(True)
 
