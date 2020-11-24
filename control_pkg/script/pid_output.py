@@ -3,21 +3,30 @@
 import rospy
 from std_msgs.msg import Float64MultiArray
 import pid_class
+import math
 
 from control_pkg.srv import PidControl, PidControlResponse
 import rospy
 
 #Coefficient of PID
 #roll
-kp1 = 1e4
+kp1 = 1
+order_p1 = 4
 ki1 = 0 #0.01
+order_i1 = 0
 kd1 = 0 #0.01
+order_d1 = 0
 
 #pitch
-kp2 = 1e4
+kp2 = 1
+order_p2 = 4
 ki2 = 0 #0.01
+order_i2 = 0
 kd2 = 0 #0.01
-pid = pid_class.PID(kp1, ki1, kd1, kp2, ki2, kd2)
+order_d2 = 0
+
+pid = pid_class.PID(kp1 * math.pow(order_p1), ki1 * math.pow(order_i1), kd1 * math.pow(order_d1), kp2 * math.pow(order_p2)
+                    , ki2 * math.pow(order_i2), kd2 * math.pow(order_d2))
 limit = 100
 K_roll = 1
 K_pitch = 1
@@ -43,13 +52,24 @@ motor = [0.0]*8
 
 def handle_pid_control(req):
     kp1 = req.p1
+    order_p1 = req.po1
     ki1 = req.i1
+    order_i1 = req.io1
     kd1 = req.d1
+    order_d1 = req.do1
     kp2 = req.p2
+    order_p2 = req.po2
     ki2 = req.i2
+    order_i2 = req.io2
     kd2 = req.d2
-    print("Get control msg [%f %f %f %f %f %f]"%(kp1, ki1, kd1, kp2, ki2, kd2))
-    pid.setAllCoeff([kp1, ki1, kd1, kp2, ki2, kd2])
+    order_d2 = req.do2
+
+    print("Get control msg [%f %f %f %f %f %f %f %f %f %f %f %f]"%(kp1, order_p1, ki1, order_i1, kd1, order_d1
+        , kp2, order_p2, ki2, order_i2, kd2, order_d2))
+        
+    pid.setAllCoeff( [kp1 * math.pow(order_p1), ki1 * math.pow(order_i1), kd1 * math.pow(order_d1), kp2 * math.pow(order_p2)
+                    , ki2 * math.pow(order_i2), kd2 * math.pow(order_d2)] )
+
     return PidControlResponse(True)
 
 def pid_control_server():
@@ -83,33 +103,16 @@ def update_motor(feedback):
     value_roll = feedback[0] * K_roll
     value_pitch = feedback[1] * K_pitch
 
-    if motor[0] - value_roll - value_pitch < -limit:
-        motor[0] = -limit
-    elif motor[0] - value_roll - value_pitch > limit:
-        motor[0] = limit
-    else:
-        motor[0] -= value_roll - value_pitch
-    
-    if motor[1] - value_roll + value_pitch < -limit:
-        motor[1] = -limit
-    elif motor[1] - value_roll + value_pitch > limit:
-        motor[1] = limit
-    else:
-        motor[1] -= value_roll + value_pitch
+    value = []
+    value[4] = { -value_roll - value_pitch,  -value_roll + value_pitch, value_roll + value_pitch, value_roll - value_pitch}
 
-    if motor[2] + value_roll + value_pitch < -limit:
-        motor[2] = -limit
-    elif motor[2] + value_roll + value_pitch > limit:
-        motor[2] = limit
-    else:
-        motor[2] += value_roll + value_pitch 
-
-    if motor[3] + value_roll - value_pitch < -limit:
-        motor[3] = -limit
-    elif motor[3] + value_roll - value_pitch > limit:
-        motor[3] = limit
-    else:
-        motor[3] += value_roll - value_pitch
+    for i in range(4):
+        if motor[i] + value[i] < -limit:
+            motor[i] = -limit
+        elif motor[i] + value[i] > limit:
+            motor[i] = limit
+        else:
+            motor[i] += value[i]
 
 def talker():
     rospy.loginfo(motor)
