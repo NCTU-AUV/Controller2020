@@ -103,11 +103,7 @@ def update_motor(feedback):
     value_roll = feedback[0] * K_roll
     value_pitch = feedback[1] * K_pitch
 
-    value = []
-    value[0] = -value_roll - value_pitch
-    value[1] = -value_roll + value_pitch
-    value[2] = value_roll + value_pitch
-    value[3] = value_roll - value_pitch
+    value = [-value_roll - value_pitch, -value_roll + value_pitch, value_roll + value_pitch, value_roll - value_pitch]
 
     for i in range(4):
         if motor[i] + value[i] < -limit:
