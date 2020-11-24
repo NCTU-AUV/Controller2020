@@ -3,7 +3,6 @@
 import rospy
 from std_msgs.msg import Float64MultiArray
 import pid_class
-from control_pkg.srv import PidControl, PidControlResponse
 
 def listener(number):
     if number == "1":
