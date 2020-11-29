@@ -23,6 +23,7 @@ def stop_motor(pub):
     for i in range(3):
         pub.publish(Float64MultiArray(data=force))
         time.sleep(0.1)
+    print('Finishing stopping motors')
 
 if __name__ == '__main__':
     rospy.init_node('talker', anonymous=True)
