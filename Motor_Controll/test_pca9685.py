@@ -18,27 +18,31 @@ import sys
 import numpy as np
 
 class TestPCA9685:
-    def __init__(self) -> None:
-        self.motor_init()
+    pca9685_addr = 0x40
+    bus = SMBus(1)    
 
+    def __init__(self) -> None:
+        self.f = int(input('input freq: '))
+        self.motor_init(self.f)
+   
     def motor_init(self, freq=71):
             # Set PWM frequency
-            freq_raw = round(25e6 / (4096 * freq)) - 1
+            self.freq_raw = round(25e6 / (4096 * freq)) - 1
             print(f'freq: {freq}')
-            print(f'freq_raw: {freq_raw}')
+            print(f'freq_raw: {self.freq_raw}')
             '''
             freq_raw = 85 (freq approximatly 71)
             will make steps equaling width with the datasheet of T200
             If want to change the frequency, need to set pca9685 to sleep mode
             '''
             self.set_sleep(self.pca9685_addr)
-            self.bus.write_byte_data(self.pca9685_addr, 0xFE, freq_raw)
+            self.bus.write_byte_data(self.pca9685_addr, 0xFE, self.freq_raw)
             self.unset_sleep(self.pca9685_addr)
 
             
             for i in range(16):
                 self.set_PWM_ON(self.pca9685_addr, i, 0)
-            for i in range(8):
+            for i in range(16):
                 self.set_motor(i, 468)    # send start signal
             #self.set_motor(1, 468)
             
@@ -85,3 +89,13 @@ class TestPCA9685:
             addr, reg_mode1, [old_mode1_val & ~(sleep_bit)])
 
 
+if __name__ == '__main__':
+    test = TestPCA9685()
+
+    try:
+        while 1:
+            cmd = int(input('input cmd val: '))
+            print(f'it shoud be {cmd/test.f/4096*1e6} us')
+            test.set_motor(8, cmd)
+    except KeyboardInterrupt:
+        print('bye') 
