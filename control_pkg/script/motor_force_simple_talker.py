@@ -9,7 +9,11 @@ from std_msgs.msg import Float64MultiArray
 def talker(pub):
     rate = rospy.Rate(10) # 10hz
     
-    force = [0.4 for _ in range(8)]
+    force = [-1 for _ in range(4)]
+    for _ in range(4):
+        force.append(0)
+    force[2] += 0.2
+    
     while not rospy.is_shutdown():
         # hello_str = "hello world %s" % rospy.get_time()
         # force = [0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2]
@@ -32,3 +36,4 @@ if __name__ == '__main__':
         talker(pub)
     except rospy.ROSInterruptException:
         stop_motor(pub)
+

@@ -117,10 +117,10 @@ class MotorController:
     def fuse(val):
         if 461 <= val <= 474:
             return 468
-        if val < 440:
-            return 440
-        if val > 490:
-            return 490
+        if val < 390:
+            return 390
+        if val > 540:
+            return 540
         return int(val)
 
     @classmethod
