@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 
 import serial
+import glob
 from struct import *
 # import rospy
 # from std_msgs.msg import String
 # from std_msgs.msg import Float32
 # from sensor_msgs.msg import Imu
 
-port = '/dev/ttyACM0'
+port = glob.glob('/dev/ttyACM*')[0]
 
 arduino = serial.Serial(port, 9600, timeout=1)
 if not arduino.is_open:
