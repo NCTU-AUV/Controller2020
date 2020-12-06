@@ -32,7 +32,7 @@ pitch_pid = pid_class.PID(math.pow(kp_p, order_p_p), math.pow(ki_p, order_i_p), 
 
 limit = 100
 
-motor = [0.0]*8
+motor = [0.0]*4
 
 #       0-3 up/down
 #       4-5 thrust

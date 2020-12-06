@@ -2,7 +2,6 @@
 
 import rospy
 from std_msgs.msg import Float64MultiArray
-import pid_class
 
 def listener(number):
     if number == "1":

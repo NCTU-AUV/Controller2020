@@ -36,7 +36,7 @@ limit = 100
 #set depth
 depth = 40
 
-motor = [0.0]*8
+motor = [0.0]*4
 
 #       0-3 up/down
 #       4-5 thrust
