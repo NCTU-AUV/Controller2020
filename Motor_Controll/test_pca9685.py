@@ -25,7 +25,7 @@ class TestPCA9685:
         self.f = int(input('input freq: '))
         self.motor_init(self.f)
    
-    def motor_init(self, freq=71):
+    def motor_init(self, freq=224):
             # Set PWM frequency
             self.freq_raw = round(25e6 / (4096 * freq)) - 1
             print(f'freq: {freq}')
@@ -42,8 +42,8 @@ class TestPCA9685:
             
             for i in range(16):
                 self.set_PWM_ON(self.pca9685_addr, i, 0)
-            for i in range(16):
-                self.set_motor(i, 468)    # send start signal
+            for i in range(1):
+                self.set_motor(i, 1500)    # send start signal
             #self.set_motor(1, 468)
             
             ''' Check the desired frequnency is written to register '''
@@ -96,6 +96,7 @@ if __name__ == '__main__':
         while 1:
             cmd = int(input('input cmd val: '))
             print(f'it shoud be {cmd/test.f/4096*1e6} us')
-            test.set_motor(8, cmd)
+            for i in range(8):
+                test.set_motor(i, cmd)
     except KeyboardInterrupt:
         print('bye') 
