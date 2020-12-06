@@ -128,11 +128,8 @@ class PID:
             
         return self.output
 
-    def setDTerm_roll(self, Dterm):
-        self.DTerm_roll = Dterm
-    
-    def setDTerm_pitch(self, Dterm):
-        self.DTerm_pitch = Dterm
+    def setDTerm(self, Dterm):
+        self.DTerm = Dterm
 
     def setAllCoeff(self, k):
         self.Kp = k[0]

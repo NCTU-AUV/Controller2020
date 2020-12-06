@@ -83,8 +83,8 @@ def callback(data):
     #rospy.loginfo(rospy.get_caller_id() + "%s", data.data)
     
     #D term = w
-    roll_pid.setDTerm_roll(data.data[0])
-    pitch_pid.setDTerm_pitch(data.data[2])
+    roll_pid.setDTerm(data.data[0])
+    pitch_pid.setDTerm(data.data[2])
     
     feedback = [roll_pid.update_RollorPitch(data.data[0]), pitch_pid.update_RollorPitch(data.data[2])]
     #print(feedback)
