@@ -14,28 +14,23 @@ class Test_Dive:
         self.pub = rospy.Publisher('Motors_Force', Float64MultiArray, queue_size=10)
 
         rospy.init_node('talker', anonymous=True)
-        
+        rospy.on_shutdown(self.stop_motor)
+
         self.t = threading.Thread(target=self.input_motor)
-        try:
-            self.run()
-            #self.diving()
-        except KeyboardInterrupt:
-            force = [0 for _ in range(8)]
-            self.pub.publish(Float64MultiArray(data=force))    
-            print('Bye~')
+        
+        self.run()
+        # self.diving()
 
     def run(self):
-        rate = rospy.Rate(10) # 10hz
+        rate = rospy.Rate(10)  # 10hz
         
-        self.dc_force = 3.85
-        force = [self.dc_force for _ in range(4)]
-        for _ in range(4):
-            force.append(0)   
+        self.dc_force = 2
+        force = [self.dc_force for _ in range(8)]   
         
         force[0] += 0.00
-        force[1] += 0.12
-        force[2] += 0.07
-        force[3] += 0.01
+        force[1] += 0.00
+        force[2] += 0.00
+        force[3] += 0.00
         force[4] = 0.01 #0.05
         force[5] = 0.04 #0.07
         force[6] = 0.4 # clock-wise
@@ -50,9 +45,7 @@ class Test_Dive:
             rospy.loginfo(Float64MultiArray(data=force))
             self.pub.publish(Float64MultiArray(data=force))
             rate.sleep()
-        
-        self.stop_motor()
-        
+
     def input_motor(self):
         print('Status:')
         print(f'DC_force: {self.dc_force}')
@@ -89,5 +82,3 @@ class Test_Dive:
 
 if __name__ == '__main__':
     Test_Dive()
-
-

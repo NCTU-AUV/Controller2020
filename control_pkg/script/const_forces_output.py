@@ -31,6 +31,7 @@ def stop_motor(pub):
 
 if __name__ == '__main__':
     rospy.init_node('talker', anonymous=True)
+    rospy.on_shutdown(stop_motor)
     pub = rospy.Publisher('Motors_Force', Float64MultiArray, queue_size=10)
     try:
         talker(pub)
