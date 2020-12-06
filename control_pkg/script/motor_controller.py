@@ -91,13 +91,12 @@ class MotorController:
         listener = rospy.Subscriber(
             'Motors_Force', Float64MultiArray, self.callback)
 
-    def motor_init(self, freq=71):
+    def motor_init(self, freq=224):
         # Set PWM frequency
         freq_raw = round(25000000 / (4096 * freq)) - 1
-        print(freq_raw)
+        print(f'freq ram: {freq_raw}')
         '''
-        freq_raw = 85 (freq approximatly 71)
-        will make steps equaling width with the datasheet of T200
+        freq = 224 will make one step in pca9685 equal to 1e-6 (s).
         If want to change the frequency, need to set pca9685 to sleep mode
         '''
         self.set_sleep(self.pca9685_addr)
@@ -108,8 +107,8 @@ class MotorController:
         for i in range(16):
             self.set_PWM_ON(self.pca9685_addr, i, 0)
         for i in range(8):
-            self.set_motor(i, 468)    # send start signal
-        #self.set_motor(1, 468)
+            self.set_motor(i, 1500)    # send start signal
+        #self.set_motor(1, 1500)
 
         ''' Check the desired frequnency is written to register '''
         # print('freq signal: ' + str(self.bus.read_byte_data(self.pca9685_addr, 0xFE)))
@@ -118,37 +117,46 @@ class MotorController:
     def callback(cls, data):
         #print(type(data.data))
         cmd = np.interp(data.data, cls.FORCE, cls.CONTROLL)
-        cmd = [cls.fuse(val) for val in cmd]
-
-
         for i in range(8):
             cls.set_motor(i, cmd[i])
 
-        #cls.set_motor(1, cmd[1])
+        # cls.set_motor(1, cmd[1])
         rospy.loginfo('motor %d final control: %d', 1, cmd[1])
-        #rospy.loginfo(data)
+        # rospy.loginfo(data)
 
     ''' Set a fuse for motor max controlling '''
     @staticmethod
     def fuse(val):
-        if 461 <= val <= 474:
-            return 468
-        if val < 400:
-            return 400
-        if val > 530:
-            return 530
+        if val < 1104:
+            return 1104
+        if val > 1896:
+            return 1896
         return int(val)
 
+    ''' Mapping the datasheet control signal to real value '''
+    ''' In this version, we assume there is only offset from the stop region '''
+    @staticmethod
+    def correction(val):
+        if 1472 <= val <= 1528:
+            return 1490             # [1472-1528] -> [1469-1509]
+        elif val > 1528:
+            return val-18           # 1529 -> 1511
+        elif val < 1472:
+            return val-4            # 1571 -> 1568
+
+    ''' Send motor controll signal '''
     @classmethod
     def set_motor(cls, motor, val):
+        val = cls.fuse(val)
+        val = cls.correction(val)
         cls.set_PWM_OFF(cls.pca9685_addr, motor, val)
 
     ''' Will be called if press ctrl+C '''
     @classmethod
     def shutdown(cls):
         for i in range(16):
-            cls.set_motor(i, 0)
-        print('\nstop')
+            cls.set_motor(i, 1500)
+        print('\nStopped signal sent')
 
     '''
     function from Ref
