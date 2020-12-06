@@ -10,26 +10,27 @@ import rospy
 
 #Coefficient of PID
 #roll
-kp1 = 1
-order_p1 = 4
-ki1 = 0 #0.01
-order_i1 = 0
-kd1 = 0 #0.01
-order_d1 = 0
+kp_r = 1
+order_p_r = 4
+ki_r = 0 #0.01
+order_i_r = 0
+kd_r = 0 #0.01
+order_d_r = 0
+K_roll = 1
 
 #pitch
-kp2 = 1
-order_p2 = 4
-ki2 = 0 #0.01
-order_i2 = 0
-kd2 = 0 #0.01
-order_d2 = 0
-
-pid = pid_class.PID(math.pow(kp1, order_p1), math.pow(ki1, order_i1), math.pow(kd1, order_d1), math.pow(kp2, order_p2)
-                    , math.pow(ki2, order_i2), math.pow(kd2, order_d2))
-limit = 100
-K_roll = 1
+kp_p = 1
+order_p_p = 4
+ki_p = 0 #0.01
+order_i_p = 0
+kd_p = 0 #0.01
+order_d_p = 0
 K_pitch = 1
+
+roll_pid = pid_class.PID(math.pow(kp_r, order_p_r), math.pow(ki_r, order_i_r), math.pow(kd_r, order_d_r), K_roll)
+pitch_pid = pid_class.PID(math.pow(kp_p, order_p_p), math.pow(ki_p, order_i_p), math.pow(kd_p, order_d_p), K_pitch)
+
+limit = 100
 
 motor = [0.0]*8
 
@@ -51,30 +52,30 @@ motor = [0.0]*8
         
 
 def handle_pid_control(req):
-    kp1 = req.p1
-    order_p1 = req.po1
-    ki1 = req.i1
-    order_i1 = req.io1
-    kd1 = req.d1
-    order_d1 = req.do1
-    kp2 = req.p2
-    order_p2 = req.po2
-    ki2 = req.i2
-    order_i2 = req.io2
-    kd2 = req.d2
-    order_d2 = req.do2
+    kp_r = req.p_r
+    order_p_r = req.po_r
+    ki_r = req.i_r
+    order_i_r = req.io_r
+    kd_r = req.d_r
+    order_d_r = req.do_r
+    kp_p = req.p2_p
+    order_p_p = req.po_p
+    ki_p = req.i_p
+    order_i_p = req.io_p
+    kd_p = req.d_p
+    order_d_p = req.do_p
 
-    print("Get control msg [%f %f %f %f %f %f %f %f %f %f %f %f]"%(kp1, order_p1, ki1, order_i1, kd1, order_d1
-        , kp2, order_p2, ki2, order_i2, kd2, order_d2))
+    print("Get control msg [%f %f %f %f %f %f %f %f %f %f %f %f]"%(kp_r, order_p_r, ki_r, order_i_r, kd_r, order_d_r,
+    kp_p, order_p_p, ki_p, order_i_p, kd_p, order_d_p))
 
-    pid.setAllCoeff( [math.pow(kp1, order_p1), math.pow(ki1, order_i1), math.pow(kd1, order_d1), math.pow(kp2, order_p2)
-                    , math.pow(ki2, order_i2), math.pow(kd2, order_d2)] )
+    roll_pid.setAllCoeff( [math.pow(kp_r, order_p_r), math.pow(ki_r, order_i_r), math.pow(kd_r, order_d_r)] )
+    pitch_pid.setAllCoeff( [math.pow(kp_p, order_p_p), math.pow(ki_p, order_i_p), math.pow(kd_p, order_d_p)] )
 
     return PidControlResponse(True)
 
 def pid_control_server():
     # rospy.init_node('pid_control_server')
-    s = rospy.Service('pid_control', PidControl, handle_pid_control)
+    s = rospy.Service('attitude_pid_control', PidControl, handle_pid_control)
     print("Ready to get control msg.")
     #rospy.spin()
 
@@ -82,10 +83,10 @@ def callback(data):
     #rospy.loginfo(rospy.get_caller_id() + "%s", data.data)
     
     #D term = w
-    pid.setDTerm_roll(data.data[0])
-    pid.setDTerm_pitch(data.data[2])
+    roll_pid.setDTerm_roll(data.data[0])
+    pitch_pid.setDTerm_pitch(data.data[2])
     
-    feedback = pid.update_RollandPitch(data.data[0], data.data[2])
+    feedback = [roll_pid.update_RollorPitch(data.data[0]), pitch_pid.update_RollorPitch(data.data[2])]
     #print(feedback)
     update_motor(feedback)
 
@@ -95,13 +96,11 @@ def listener():
     rospy.Subscriber("IMU/Attitude", Float64MultiArray, callback)
     rospy.spin()
 
-def update_motor(feedback):
+def update_motor(force):
     global motor
     global limit
-    global K_roll
-    global K_pitch
-    value_roll = feedback[0] * K_roll
-    value_pitch = feedback[1] * K_pitch
+    value_roll = force[0]
+    value_pitch = force[1]
 
     value = [-value_roll - value_pitch, -value_roll + value_pitch, value_roll + value_pitch, value_roll - value_pitch]
 
@@ -118,7 +117,7 @@ def talker():
     pub.publish(Float64MultiArray(data = motor))
 
 if __name__ == '__main__':
-    rospy.init_node('pid', anonymous=True)
+    rospy.init_node('attitude_pid', anonymous=True)
     pid_control_server()
-    pub = rospy.Publisher('Motors_Force', Float64MultiArray, queue_size=10)
+    pub = rospy.Publisher('Motors_Force_Attitude', Float64MultiArray, queue_size=10)
     listener()
