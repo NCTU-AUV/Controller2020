@@ -76,7 +76,7 @@ class PID:
            Test PID with Kp=1.2, Ki=1, Kd=0.001 (test_pid.py)
 
         """
-        error = feedback_value
+        error = self.SetPoint - feedback_value
 
         self.current_time = time.time()
         delta_time = self.current_time - self.last_time
@@ -100,7 +100,7 @@ class PID:
         return self.K * self.output
     
     def update_Depth(self, feedback_value):
-        error = feedback_value
+        error = self.SetPoint - feedback_value
 
         self.current_time = time.time()
         delta_time = self.current_time - self.last_time

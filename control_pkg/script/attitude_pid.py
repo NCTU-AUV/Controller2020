@@ -119,5 +119,7 @@ def talker():
 if __name__ == '__main__':
     rospy.init_node('attitude_pid', anonymous=True)
     pid_control_server()
+    roll_pid.setSetPoint(0.5)
+    pitch_pid.setSetPoint(20)
     pub = rospy.Publisher('Motors_Force_Attitude', Float64MultiArray, queue_size=10)
     listener()
