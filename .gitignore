@@ -1,4 +1,5 @@
 *.swp
+*.swo
 git 
 # ignore python cache
 **/__pycache__/
