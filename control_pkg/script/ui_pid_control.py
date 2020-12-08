@@ -13,35 +13,79 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from control_pkg.srv import PidControl, PidControlResponse
 import rospy
 
+
+class Mylabel(QtWidgets.QLabel):
+    def __init__(self, x):
+        super(Mylabel, self).__init__(x)
+
+    def set_scaled_num(self, num):
+        try:
+            self.setNum(num / 100)
+        except:
+            return
+
+    def set_text_num(self, s):
+        try:
+            self.setNum(float(s))
+        except:
+            return
+
+
+class Myslider(QtWidgets.QSlider):
+    def __init__(self, x):
+        super(Myslider, self).__init__(x)
+
+    def set_text_num1(self, s):
+        try:
+            self.setValue(float(s)*100)
+        except:
+            return
+
+    def set_text_num2(self, s):
+        try:
+            self.setValue(int(s))
+        except:
+            return
+
+
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
         Dialog.setObjectName("Dialog")
-        Dialog.resize(560, 340)
+        Dialog.resize(800, 640)
         self.gridLayoutWidget = QtWidgets.QWidget(Dialog)
-        self.gridLayoutWidget.setGeometry(QtCore.QRect(30, 20, 500, 300))
+        self.gridLayoutWidget.setGeometry(QtCore.QRect(30, 20, 750, 600))
         self.gridLayout = QtWidgets.QGridLayout(self.gridLayoutWidget)
         self.gridLayout.setContentsMargins(0, 0, 0, 0)
 
-        self.labels = [0]*6
-        self.minus_pushButtons = [0]*6
-        self.plus_pushButtons = [0]*6
-        self.labels_num = [0]*6
-        self.sliders = [0]*6
+        self.labels = [0]*12
+        self.minus_pushButtons = [0]*12
+        self.plus_pushButtons = [0]*12
+        self.labels_num = [0]*12
+        self.sliders = [0] * 12
+        self.textBoxes = [0] * 12
 
-        for i in range(6):
+        for i in range(12):
             self.addControlbar(i)
 
-        self.labels[0].setText("P1")
-        self.labels[1].setText("I1")
-        self.labels[2].setText("D1")
-        self.labels[3].setText("P2")
-        self.labels[4].setText("I2")
-        self.labels[5].setText("D2")
-        
+        self.labels[0].setText("Roll_P1")
+        self.labels[1].setText("Roll_P1_Order")
+        self.labels[2].setText("Roll_I1")
+        self.labels[3].setText("Roll_I1_Order")
+        self.labels[4].setText("Roll_D1")
+        self.labels[5].setText("Roll_D1_Order")
+
+        self.labels[6].setText("Pitch_P2")
+        self.labels[7].setText("Pitch_P2_Order")
+        self.labels[8].setText("Pitch_I2")
+        self.labels[9].setText("Pitch_I2_Order")
+        self.labels[10].setText("Pitch_D2")
+        self.labels[11].setText("Pitch_D2_Order")
+
         self.send_button = QtWidgets.QPushButton(self.gridLayoutWidget)
         self.send_button.setText("send")
         self.send_button.clicked.connect(self.send_pid_control_msg)
-        self.gridLayout.addWidget(self.send_button, 6, 0, 1, 6)
+        self.gridLayout.addWidget(self.send_button, 12, 0, 1, 12)
+
         QtCore.QMetaObject.connectSlotsByName(Dialog)
 
     def send_pid_control_msg(self):
@@ -49,17 +93,23 @@ class Ui_Dialog(object):
         try:
             pid_control = rospy.ServiceProxy('pid_control', PidControl)
             resp = pid_control(float(self.labels_num[0].text()),
-                                float(self.labels_num[1].text()), 
-                                float(self.labels_num[2].text()), 
-                                float(self.labels_num[3].text()), 
-                                float(self.labels_num[4].text()), 
-                                float(self.labels_num[5].text()))
+                               float(self.labels_num[1].text()),
+                               float(self.labels_num[2].text()),
+                               float(self.labels_num[3].text()),
+                               float(self.labels_num[4].text()),
+                               float(self.labels_num[5].text()),
+                               float(self.labels_num[6].text()),
+                               float(self.labels_num[7].text()),
+                               float(self.labels_num[8].text()),
+                               float(self.labels_num[9].text()),
+                               float(self.labels_num[10].text()),
+                               float(self.labels_num[11].text()))
             print("req = " + str(resp))
         except rospy.ServiceException as e:
-            print("Service call failed: %s"%e)
+            print("Service call failed: %s" % e)
 
     def addControlbar(self, iter):
-        self.labels[iter] = QtWidgets.QLabel(self.gridLayoutWidget)
+        self.labels[iter] = Mylabel(self.gridLayoutWidget)
         self.gridLayout.addWidget(self.labels[iter], iter, 0, 1, 1)
 
         self.minus_pushButtons[iter] = QtWidgets.QPushButton(
@@ -67,7 +117,6 @@ class Ui_Dialog(object):
         self.minus_pushButtons[iter].setText("-")
         self.minus_pushButtons[iter].clicked.connect(
             lambda: self.sliders[iter].setValue(self.sliders[iter].value()-1))
-        # self.minus_pushButtons[iter].clicked.connect(self.send_pid_control_msg)
         self.gridLayout.addWidget(self.minus_pushButtons[iter], iter, 1, 1, 1)
 
         self.plus_pushButtons[iter] = QtWidgets.QPushButton(
@@ -75,17 +124,32 @@ class Ui_Dialog(object):
         self.plus_pushButtons[iter].setText("+")
         self.plus_pushButtons[iter].clicked.connect(
             lambda: self.sliders[iter].setValue(self.sliders[iter].value()+1))
-        # self.plus_pushButtons[iter].clicked.connect(self.send_pid_control_msg)
         self.gridLayout.addWidget(self.plus_pushButtons[iter], iter, 2, 1, 1)
 
-        self.labels_num[iter] = QtWidgets.QLabel(self.gridLayoutWidget)
-        self.labels_num[iter].setText("00")
+        self.labels_num[iter] = Mylabel(self.gridLayoutWidget)
+        self.labels_num[iter].setText("000")
         self.gridLayout.addWidget(self.labels_num[iter], iter, 3, 1, 1)
 
-        self.sliders[iter] = QtWidgets.QSlider(self.gridLayoutWidget)
+        self.sliders[iter] = Myslider(self.gridLayoutWidget)
+        self.textBoxes[iter] = QtWidgets.QLineEdit(self.gridLayoutWidget)
         self.sliders[iter].setOrientation(QtCore.Qt.Horizontal)
-        self.sliders[iter].valueChanged.connect(self.labels_num[iter].setNum)
-        # self.sliders[iter].valueChanged.connect(self.send_pid_control_msg)
+        if iter % 2 == 0:
+            self.sliders[iter].setMinimum(0)
+            self.sliders[iter].setMaximum(999)
+            self.sliders[iter].valueChanged.connect(
+                self.labels_num[iter].set_scaled_num)
+            self.textBoxes[iter].textChanged.connect(
+                self.sliders[iter].set_text_num1)
+        else:
+            self.sliders[iter].setMinimum(-5)
+            self.sliders[iter].setMaximum(5)
+            self.sliders[iter].valueChanged.connect(
+                self.labels_num[iter].setNum)
+            self.textBoxes[iter].textChanged.connect(
+                self.sliders[iter].set_text_num2)
+
         self.gridLayout.addWidget(self.sliders[iter], iter, 4, 1, 1)
 
-
+        self.textBoxes[iter].textChanged.connect(
+            self.labels_num[iter].set_text_num)
+        self.gridLayout.addWidget(self.textBoxes[iter], iter, 5, 1, 1)

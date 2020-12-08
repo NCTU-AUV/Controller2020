@@ -77,6 +77,7 @@ class PID:
 
         """
         error = self.SetPoint - feedback_value
+        #print(error)        
 
         self.current_time = time.time()
         delta_time = self.current_time - self.last_time
@@ -96,7 +97,7 @@ class PID:
             self.last_error = error
 
             self.output = self.PTerm + (self.Ki * self.ITerm) + (self.Kd * self.DTerm)
-            
+           
         return self.K * self.output
     
     def update_Depth(self, feedback_value):
@@ -125,7 +126,7 @@ class PID:
             self.last_error = error
 
             self.output = self.PTerm + (self.Ki * self.ITerm) + (self.Kd * self.DTerm)
-            
+           
         return self.output
 
     def setDTerm(self, Dterm):

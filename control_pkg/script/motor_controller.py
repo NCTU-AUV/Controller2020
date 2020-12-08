@@ -120,16 +120,18 @@ class MotorController:
         for i in range(8):
             cls.set_motor(i, cmd[i])
 
+        print(f'Total Force:    {data.data}')
+        print(f'Final controll: {cmd}')
         # cls.set_motor(1, cmd[1])
-        rospy.loginfo('motor %d final control: %d', 1, cmd[1])
+        # rospy.loginfo('motor %d final control: %d', 1, cmd[1])
         # rospy.loginfo(data)
 
     ''' Set a fuse for motor max controlling '''
     @staticmethod
     def fuse(val):
-        if val < 1104:
+        if val < 1104:      # 1104
             return 1104
-        if val > 1896:
+        if val > 1896:      # 1896
             return 1896
         return int(val)
 
@@ -154,8 +156,11 @@ class MotorController:
     ''' Will be called if press ctrl+C '''
     @classmethod
     def shutdown(cls):
-        for i in range(16):
-            cls.set_motor(i, 1500)
+        slow = [1400, 1420, 1440, 1460, 1480, 1500]
+        for j in range(6):
+            for i in range(16):
+                cls.set_motor(i, slow[j])
+            time.sleep(0.02)
         print('\nStopped signal sent')
 
     '''

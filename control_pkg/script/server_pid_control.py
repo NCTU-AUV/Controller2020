@@ -4,7 +4,8 @@ from control_pkg.srv import PidControl, PidControlResponse
 import rospy
 
 def handle_pid_control(req):
-    print("Get control msg [%f %f %f %f %f %f]"%(req.p1, req.i1, req.d1, req.p2, req.i2, req.d2))
+    print("Get control msg [%f %f %f %f %f %f %f %f %f %f %f %f ]"%
+        (req.p1, req.po1, req.i1, req.io1, req.d1, req.do1, req.p2, req.po2, req.i2, req.io2, req.d2, req.do2))
     return PidControlResponse(True)
 
 def pid_control_server():

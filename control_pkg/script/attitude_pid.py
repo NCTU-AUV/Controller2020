@@ -11,26 +11,27 @@ import rospy
 #Coefficient of PID
 #roll
 kp_r = 1
-order_p_r = 4
+order_p_r = -2
 ki_r = 0 #0.01
 order_i_r = 0
-kd_r = 0 #0.01
+kd_r = 0.01 #0.01
 order_d_r = 0
-K_roll = 1
+K_roll = 100
 
 #pitch
 kp_p = 1
-order_p_p = 4
+order_p_p = -2
 ki_p = 0 #0.01
 order_i_p = 0
-kd_p = 0 #0.01
+kd_p = 0.01 #0.01
 order_d_p = 0
-K_pitch = 1
+K_pitch = 100
 
-roll_pid = pid_class.PID(math.pow(kp_r, order_p_r), math.pow(ki_r, order_i_r), math.pow(kd_r, order_d_r), K_roll)
-pitch_pid = pid_class.PID(math.pow(kp_p, order_p_p), math.pow(ki_p, order_i_p), math.pow(kd_p, order_d_p), K_pitch)
+roll_pid = pid_class.PID(kp_r, ki_r, kd_r, K_roll)
+pitch_pid = pid_class.PID(kp_p, ki_p, kd_p, K_pitch)
 
-limit = 100
+upper_bound = 10000
+lower_bound = 50
 
 motor = [0.0]*4
 
@@ -76,7 +77,7 @@ def handle_pid_control(req):
 def pid_control_server():
     # rospy.init_node('pid_control_server')
     s = rospy.Service('attitude_pid_control', PidControl, handle_pid_control)
-    print("Ready to get control msg.")
+    #print("Ready to get control msg.")
     #rospy.spin()
 
 def callback(data):
@@ -84,9 +85,9 @@ def callback(data):
     
     #D term = w
     roll_pid.setDTerm(data.data[0])
-    pitch_pid.setDTerm(data.data[2])
-    
-    feedback = [roll_pid.update_RollorPitch(data.data[0]), pitch_pid.update_RollorPitch(data.data[2])]
+    pitch_pid.setDTerm(data.data[1])
+
+    feedback = [roll_pid.update_RollorPitch(data.data[0]), pitch_pid.update_RollorPitch(data.data[1])]
     #print(feedback)
     update_motor(feedback)
 
@@ -105,12 +106,14 @@ def update_motor(force):
     value = [-value_roll - value_pitch, -value_roll + value_pitch, value_roll + value_pitch, value_roll - value_pitch]
 
     for i in range(4):
-        if motor[i] + value[i] < -limit:
-            motor[i] = -limit
-        elif motor[i] + value[i] > limit:
-            motor[i] = limit
+        if value[i] < -upper_bound:
+            motor[i] = -upper_bound
+        elif value[i] > upper_bound:
+            motor[i] = upper_bound
+        elif value[i] > -lower_bound and value[i] < lower_bound:
+            motor[i] = 0
         else:
-            motor[i] += value[i]
+            motor[i] = -value[i]
 
 def talker():
     rospy.loginfo(motor)
@@ -119,7 +122,7 @@ def talker():
 if __name__ == '__main__':
     rospy.init_node('attitude_pid', anonymous=True)
     pid_control_server()
-    roll_pid.setSetPoint(0.5)
+    roll_pid.setSetPoint(-5)
     pitch_pid.setSetPoint(20)
     pub = rospy.Publisher('Motors_Force_Attitude', Float64MultiArray, queue_size=10)
     listener()
