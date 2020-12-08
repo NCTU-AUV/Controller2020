@@ -69,8 +69,8 @@ def handle_pid_control(req):
     print("Get control msg [%f %f %f %f %f %f %f %f %f %f %f %f]"%(kp_r, order_p_r, ki_r, order_i_r, kd_r, order_d_r,
     kp_p, order_p_p, ki_p, order_i_p, kd_p, order_d_p))
 
-    roll_pid.setAllCoeff( [math.pow(kp_r, order_p_r), math.pow(ki_r, order_i_r), math.pow(kd_r, order_d_r)] )
-    pitch_pid.setAllCoeff( [math.pow(kp_p, order_p_p), math.pow(ki_p, order_i_p), math.pow(kd_p, order_d_p)] )
+    roll_pid.setAllCoeff([kp_r, ki_r, kd_r])
+    pitch_pid.setAllCoeff([kp_p, ki_p, kd_p])
 
     return PidControlResponse(True)
 
