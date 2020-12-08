@@ -27,8 +27,8 @@ kd_r = 0 #0.01
 order_d_r = 0
 K_r = 1
 
-depth_pid_l = pid_class.PID(math.pow(kp_l, order_p_l), math.pow(ki_l, order_i_l), math.pow(kd_l, order_d_l), K_l)
-depth_pid_r = pid_class.PID(math.pow(kp_r, order_p_r), math.pow(ki_r, order_i_r), math.pow(kd_r, order_d_r), K_r)
+depth_pid_l = pid_class.PID(kp_l, ki_l, kd_l, K_l, 'depth')
+depth_pid_r = pid_class.PID(kp_r, ki_r, kd_r, K_r, 'depth')
 
 #motor_limit
 limit = 100
@@ -75,15 +75,15 @@ def handle_pid_control(req):
     print("Get control msg [%f %f %f %f %f %f %f %f %f %f %f %f]"%(kp_l, order_p_l, ki_l, order_i_l, kd_l, order_d_l,
     kp_r, order_p_r, ki_r, order_i_r, kd_r, order_d_r))
 
-    depth_pid_l.setAllCoeff( [math.pow(kp_l, order_p_l), math.pow(ki_l, order_i_l), math.pow(kd_l, order_d_l)] )
-    depth_pid_r.setAllCoeff( [math.pow(kp_r, order_p_r), math.pow(ki_r, order_i_r), math.pow(kd_r, order_d_r)] ) 
+    depth_pid_l.setAllCoeff([kp_l, ki_l, kd_l])
+    depth_pid_r.setAllCoeff([kp_r, ki_r, kd_r]) 
 
     return PidControlResponse(True)
 
 def pid_control_server():
     # rospy.init_node('pid_control_server')
     s = rospy.Service('depth_pid_control', PidControl, handle_pid_control)
-    print("Ready to get control msg.")
+    #print("Ready to get control msg.")
     #rospy.spin()
 
 def callback(data):
@@ -113,7 +113,7 @@ def update_motor(force):
         elif motor[i] + value[i] > limit:
             motor[i] = limit
         else:
-            motor[i] += value[i]
+            motor[i] = value[i]
 
 def talker():
     rospy.loginfo(motor)

@@ -30,16 +30,18 @@ More information about PID Controller: http://en.wikipedia.org/wiki/PID_controll
 """
 import time
 
+
 class PID:
     """PID Controller
     """
 
-    def __init__(self, P=0.2, I=0.0, D=0.0, K=1.0):
+    def __init__(self, Type, P=0.2, I=0.0, D=0.0, K=1.0):
 
         self.Kp = P
         self.Ki = I
         self.Kd = D
         self.K = K
+        self.type = Type
 
         self.sample_time = 0.00
         self.current_time = time.time()
@@ -63,7 +65,7 @@ class PID:
 
         self.output = 0.0
 
-    def update_RollorPitch(self, feedback_value):
+    def update_Feedback(self, feedback_value, ty):
         """
         Calculates PID value for given eference feedback
 
@@ -76,32 +78,7 @@ class PID:
            Test PID with Kp=1.2, Ki=1, Kd=0.001 (test_pid.py)
 
         """
-        error = self.SetPoint - feedback_value
-        #print(error)        
-
-        self.current_time = time.time()
-        delta_time = self.current_time - self.last_time
-
-        if (delta_time >= self.sample_time):
-            self.PTerm = self.Kp * error
-
-            self.ITerm += error * delta_time
-
-            if (self.ITerm < -self.windup_guard):
-                self.ITerm = -self.windup_guard
-            elif (self.ITerm > self.windup_guard):
-                self.ITerm = self.windup_guard
-
-            # Remember last time and last error for next calculation
-            self.last_time = self.current_time
-            self.last_error = error
-
-            self.output = self.PTerm + (self.Ki * self.ITerm) + (self.Kd * self.DTerm)
-           
-        return self.K * self.output
-    
-    def update_Depth(self, feedback_value):
-        error = self.SetPoint - feedback_value
+        error = feedback_value - self.SetPoint
 
         self.current_time = time.time()
         delta_time = self.current_time - self.last_time
@@ -117,8 +94,7 @@ class PID:
             elif (self.ITerm > self.windup_guard):
                 self.ITerm = self.windup_guard
             
-            self.DTerm = 0.0
-            if delta_time > 0:
+            if delta_time > 0 and self.type == 'depth':
                 self.DTerm = delta_error / delta_time
 
             # Remember last time and last error for next calculation

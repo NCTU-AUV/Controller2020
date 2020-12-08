@@ -11,12 +11,12 @@ class Motor_Listener:
         self.motor_depth = [0.0]*4
 
         inval = float(input('Input DC Force (e.g 2): '))
-        self.dc_force = [inval for _ in range(8)]
+        self.dc_force = [inval for _ in range(4)]
         
         rospy.init_node('merge_motor', anonymous=True)
         self.pub = rospy.Publisher('Motors_Force', Float64MultiArray, queue_size=10)
         rospy.Subscriber('Motors_Force_Attitude', Float64MultiArray, self.callback_attitude)
-    
+        rospy.Subscriber('Motors_Force_Depth', Float64MultiArray, self.callback_depth)  
     def callback_attitude(self, data):
         print(f'Attitude Force {data.data}')
         for i in range(4):
@@ -26,11 +26,6 @@ class Motor_Listener:
         for i in range(4):
             self.motor_depth[i] = data.data[i]
 
-    def listener_attitude(self):
-        pass
-    def listener_depth(self):
-        rospy.Subscriber('Motors_Force_Depth', Float64MultiArray, self.callback_depth)
-    
     def talker(self):
         for i in range(4):
             self.motor[i] = self.motor_attitude[i] + self.motor_depth[i] + self.dc_force[i]

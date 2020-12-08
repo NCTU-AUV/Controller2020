@@ -14,7 +14,7 @@ kp_r = 1
 order_p_r = -2
 ki_r = 0 #0.01
 order_i_r = 0
-kd_r = 0.01 #0.01
+kd_r = 0.0 #0.01
 order_d_r = 0
 K_roll = 100
 
@@ -23,12 +23,12 @@ kp_p = 1
 order_p_p = -2
 ki_p = 0 #0.01
 order_i_p = 0
-kd_p = 0.01 #0.01
+kd_p = 0.0 #0.01
 order_d_p = 0
 K_pitch = 100
 
-roll_pid = pid_class.PID(kp_r, ki_r, kd_r, K_roll)
-pitch_pid = pid_class.PID(kp_p, ki_p, kd_p, K_pitch)
+roll_pid = pid_class.PID(kp_r, ki_r, kd_r, K_roll, 'attitude')
+pitch_pid = pid_class.PID(kp_p, ki_p, kd_p, K_pitch, 'attitude')
 
 upper_bound = 10000
 lower_bound = 50
@@ -87,7 +87,7 @@ def callback(data):
     roll_pid.setDTerm(data.data[0])
     pitch_pid.setDTerm(data.data[1])
 
-    feedback = [roll_pid.update_RollorPitch(data.data[0]), pitch_pid.update_RollorPitch(data.data[1])]
+    feedback = [roll_pid.update_Feedback(data.data[0], 'attitude'), pitch_pid.update_Feedback(data.data[1], 'attitude')]
     #print(feedback)
     update_motor(feedback)
 
@@ -103,7 +103,7 @@ def update_motor(force):
     value_roll = force[0]
     value_pitch = force[1]
 
-    value = [-value_roll - value_pitch, -value_roll + value_pitch, value_roll + value_pitch, value_roll - value_pitch]
+    value = [-value_roll-value_pitch, -value_roll+value_pitch, value_roll+value_pitch, value_roll-value_pitch]
 
     for i in range(4):
         if value[i] < -upper_bound:
@@ -113,7 +113,7 @@ def update_motor(force):
         elif value[i] > -lower_bound and value[i] < lower_bound:
             motor[i] = 0
         else:
-            motor[i] = -value[i]
+            motor[i] = value[i]
 
 def talker():
     rospy.loginfo(motor)
