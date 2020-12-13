@@ -52,9 +52,11 @@ class Attitude:
         self.roll_pid = pid_class.PID(kp_r, ki_r, kd_r, K_roll, 'attitude', -5)
         self.pitch_pid = pid_class.PID(kp_p, ki_p, kd_p, K_pitch, 'attitude', 20)
 
+        #motor_limit
         self.upper_bound = 10000
         self.lower_bound = 50
 
+        #motor
         self.motor = [0.0]*4
         
         #run
@@ -75,11 +77,11 @@ class Attitude:
         self.kd_p = req.d_p
         self.order_d_p = req.do_p
 
-        print("Get control msg [%f %f %f %f %f %f %f %f %f %f %f %f]"%(kp_r, order_p_r, ki_r, order_i_r, kd_r, order_d_r,
-        kp_p, order_p_p, ki_p, order_i_p, kd_p, order_d_p))
+        print("Get control msg [%f %f %f %f %f %f %f %f %f %f %f %f]"%(self.kp_r, self.order_p_r, self.ki_r, self.order_i_r, self.kd_r, 
+        self.order_d_r, self.kp_p, self.order_p_p, self.ki_p, self.order_i_p, self.kd_p, self.order_d_p))
 
-        self.roll_pid.setAllCoeff([kp_r, ki_r, kd_r])
-        self.pitch_pid.setAllCoeff([kp_p, ki_p, kd_p])
+        self.roll_pid.setAllCoeff([self.kp_r, self.ki_r, self.kd_r])
+        self.pitch_pid.setAllCoeff([self.kp_p, self.ki_p, self.kd_p])
 
         return PidControlResponse(True)
 
