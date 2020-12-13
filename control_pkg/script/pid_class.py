@@ -35,13 +35,14 @@ class PID:
     """PID Controller
     """
 
-    def __init__(self, Type, P=0.2, I=0.0, D=0.0, K=1.0):
+    def __init__(self, Type, P=0.2, I=0.0, D=0.0, K=1.0, setPoint=0.0):
 
         self.Kp = P
         self.Ki = I
         self.Kd = D
         self.K = K
         self.type = Type
+        self.SetPoint = setPoint
 
         self.sample_time = 0.00
         self.current_time = time.time()
