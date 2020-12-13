@@ -33,6 +33,7 @@ class IMUAttitude:
         rospy.spin()
     
     def get_data(self):
+        attitude = [0.0]*4
         while self.arduino.is_open:
             try:
                 raw_data = self.arduino.readline()
@@ -40,7 +41,9 @@ class IMUAttitude:
                 #print(raw_data)
                 attitude = [float(val) for val in raw_data.split()]
                 if len(attitude) != 4:
+                    print('Error: len != 4')
                     continue
+
                 roll = float(attitude[0])
                 pitch = float(attitude[1])
                 yaw = float(attitude[2])
@@ -52,7 +55,7 @@ class IMUAttitude:
                 # time.sleep(0.5)
                 #print(attitude)
             
-            #rospy.loginfo(attitude)
+            rospy.loginfo(attitude)
             self.arr_pub.publish(Float64MultiArray(data=attitude))
             self.roll_pub.publish(Float64(data=roll))
             self.pitch_pub.publish(Float64(data=pitch))

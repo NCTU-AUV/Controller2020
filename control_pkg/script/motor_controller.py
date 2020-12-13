@@ -156,11 +156,13 @@ class MotorController:
     ''' Will be called if press ctrl+C '''
     @classmethod
     def shutdown(cls):
-        slow = [1400, 1420, 1440, 1460, 1480, 1500]
-        for j in range(6):
-            for i in range(16):
-                cls.set_motor(i, slow[j])
-            time.sleep(0.02)
+        for i in range(8):
+            cls.set_motor(i, 0)
+        #slow = [1400, 1420, 1440, 1460, 1480, 1500]
+        #for j in range(6):
+        #    for i in range(16):
+        #        cls.set_motor(i, slow[j])
+        #    time.sleep(0.02)
         print('\nStopped signal sent')
 
     '''
