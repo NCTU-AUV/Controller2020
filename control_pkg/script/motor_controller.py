@@ -117,7 +117,7 @@ class MotorController:
     def callback(cls, data):
         #print(type(data.data))
         cmd = np.interp(data.data, cls.FORCE, cls.CONTROLL)
-        for i in range(8):
+        for i in range(6):
             cls.set_motor(i, cmd[i])
 
         print(f'Total Force:    {data.data}')
@@ -156,8 +156,10 @@ class MotorController:
     ''' Will be called if press ctrl+C '''
     @classmethod
     def shutdown(cls):
-        for i in range(8):
-            cls.set_motor(i, 0)
+        for _ in range(3):
+            for i in range(8):
+                cls.set_motor(i, 1500)
+            time.sleep(0.02)
         #slow = [1400, 1420, 1440, 1460, 1480, 1500]
         #for j in range(6):
         #    for i in range(16):
