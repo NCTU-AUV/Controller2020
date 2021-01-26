@@ -29,9 +29,17 @@ void setup() {
   IMU.setSrd(1000/hz-1); //hz(output rate) = 1000 / (1+SRD)
   
   //IMU校正的部分，此部分因應不同的IMU而改
-  IMU.setAccelCalX(0.0848, 1.0008); IMU.setAccelCalY(0.0848, 1.0057); IMU.setAccelCalZ(0.5504, 0.9842);
-  IMU.setGyroBiasX_rads(0.0136); IMU.setGyroBiasY_rads(-0.0669); IMU.setGyroBiasZ_rads(0.0121);
-  IMU.setMagCalX(33.6164, 1.1795); IMU.setMagCalY(65.2783, 0.5858); IMU.setMagCalZ(-16.7558, 2.2467);
+  IMU.setAccelCalX(0.0848, 1.0008); 
+  IMU.setAccelCalY(0.0848, 1.0057); 
+  IMU.setAccelCalZ(0.5504, 0.9842);
+  
+  IMU.setGyroBiasX_rads(0.0136); 
+  IMU.setGyroBiasY_rads(-0.0669); 
+  IMU.setGyroBiasZ_rads(0.0121);
+  
+  IMU.setMagCalX(33.6164, 1.1795); 
+  IMU.setMagCalY(65.2783, 0.5858);
+  IMU.setMagCalZ(-16.7558, 2.2467);
   
   StartTime = millis()+1000/hz; //固定輸出的時間
 }
