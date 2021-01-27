@@ -1,0 +1,12 @@
+           bias      scale
+AccelCalX  0.0848    1.0008                                                                                             
+AccelCalY  0.0848    1.0057                                                                                             
+AccelCalZ  0.5504    0.9842
+                                                                                                                                                                                                                   
+GyroBiasX  0.0136                                                                                                       
+GyroBiasY  -0.0669                                                                                                      
+GyroBiasZ  0.0121                                                                                                                                                                                                                               
+
+MagCalX    33.6164   1.1795                                                                                             
+MagCalY    65.2783   0.5858                                                                                             
+MagCalZ    -16.7558  2.2467        
