@@ -42,7 +42,7 @@ class TestPCA9685:
             
             for i in range(16):
                 self.set_PWM_ON(self.pca9685_addr, i, 0)
-            for i in range(1):
+            for i in range(16):
                 self.set_motor(i, 1500)    # send start signal
             #self.set_motor(1, 468)
             
