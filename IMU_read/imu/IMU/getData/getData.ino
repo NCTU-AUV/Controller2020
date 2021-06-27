@@ -6,9 +6,10 @@ Adafruit_Madgwick filter;
 int state, hz = 100; //state用來確認IMU的狀態，hz為取IMU資料的頻率
 
 struct Imu{
-  float q0, q1, q2, q3;
-  float gx, gy, gz;
-  float ax, ay, az;
+//  float q0, q1, q2, q3;
+//  float gx, gy, gz;
+//  float ax, ay, az;
+  float r, p, y;
 };
 
 float ax, ay, az; //a: Accelerometer
@@ -36,17 +37,17 @@ void setup() {
   IMU.setSrd(1000/hz-1); //hz(output rate) = 1000 / (1+SRD)
   
   //IMU校正的部分，此部分因應不同的IMU而改
-  IMU.setAccelCalX(0.0848, 1.0008); 
-  IMU.setAccelCalY(0.0848, 1.0057); 
-  IMU.setAccelCalZ(0.5504, 0.9842);
+  IMU.setAccelCalX(0.0587, 1.0036); 
+  IMU.setAccelCalY(0.0587, 1.0003); 
+  IMU.setAccelCalZ(0.5999, 0.9899);
   
-  IMU.setGyroBiasX_rads(0.0136); 
-  IMU.setGyroBiasY_rads(-0.0669); 
-  IMU.setGyroBiasZ_rads(0.0121);
+  IMU.setGyroBiasX_rads(0.0152); 
+  IMU.setGyroBiasY_rads(-0.0659); 
+  IMU.setGyroBiasZ_rads(0.0227);
   
-  IMU.setMagCalX(33.6164, 1.1795); 
-  IMU.setMagCalY(65.2783, 0.5858); 
-  IMU.setMagCalZ(-16.7558, 2.2467);
+  IMU.setMagCalX(17.8386, 1.6019); 
+  IMU.setMagCalY(16.1988, 0.9611); 
+  IMU.setMagCalZ(20.0220, 0.7489);
   
   StartTime = millis()+1000/hz; //固定輸出的時間
 }
@@ -74,10 +75,26 @@ void loop() {
   
   //將濾過的值以Quaternion的表示法存起來
   filter.getQuaternion(&q0, &q1, &q2, &q3);
+
+  
+  float r, p, y;
+  r = filter.getRoll();
+  p = filter.getPitch();
+  y = filter.getYaw();
+  
   
   //當到達需要輸出的時間後就輸出
   if(millis() > StartTime) {
-    Imu data = {q0, q1, q2, q3, gx, gy, gz, ax, ay, az};
+    Imu data = {/*q0, q1, q2, q3, gx, gy, gz, ax, ay, az,*/ r, p, y};
+    
+//    Serial.print(r);
+//    Serial.print(' ');
+//    Serial.print(p);
+//    Serial.print(' ');
+//    Serial.print(y);
+//    Serial.println(' ');
+    
+    
     Serial.write((byte*)&data, sizeof(data));
     Serial.write(10);
     
